@@ -1,8 +1,15 @@
 const { default: mongoose } = require('mongoose');
+require('dotenv').config()
+const USERNAME = process.env.USER;
+const HOST = process.env.HOST;
+const COLLECTION = process.env.COLLECTION;
+const RETRYWRITES= process.env.RETRYWRITES;
+const W = process.env.W;
+const PASSWORD = process.env.PASSWORD;
 
 const mongooseConnect = (callback)=>{
     mongoose
-    .connect('mongodb+srv://avitor:6G2Rt87WEwv6hJXf@cluster0.i0dinuj.mongodb.net/fashion-shop?retryWrites=true&w=majority')
+    .connect(`mongodb+srv://${USERNAME}:${PASSWORD}${HOST}/${COLLECTION}?retryWrites=${RETRYWRITES}&w=${W}`)
     .then(client=>{
         _mongoose = client;
         callback(client)
