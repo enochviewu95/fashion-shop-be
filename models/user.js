@@ -15,12 +15,13 @@ const UserSchema = new Schema(
         },
 
         statics: {
-            getUser() {
-                return this.find();
+            getUser(userId) {
+                console.log("Userid",userId)
+                return this.find({_id: userId});
             },
 
-            updateUser(collectionId, update) {
-                return this.findOneAndUpdate({ _id: collectionId }, update)
+            updateUser(userId, update) {
+                return this.findOneAndUpdate({ _id: userId }, update)
             },
 
             deleteUser(collectionId) {
