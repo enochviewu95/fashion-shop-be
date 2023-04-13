@@ -15,7 +15,7 @@ const BannerSchema = new Schema(
         },
 
         statics: {
-            getBanner() {
+            getBanners() {
                 return this.find();
             },
 

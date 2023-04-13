@@ -10,26 +10,26 @@ const ProductsSchema = new Schema(
         price: mongoose.Types.Decimal128
     },
     {
-        methods:{
-            createProduct(){
+        methods: {
+            createProduct() {
                 return this.save(this)
             },
 
         },
-        statics:{
-            getProducts(){
+        statics: {
+            getProducts() {
                 return this.find();
             },
 
-            updateProduct(prodId,update){
-                return this.findOneAndUpdate({_id: prodId},update)
+            updateProduct(prodId, update) {
+                return this.findOneAndUpdate({ _id: prodId }, update)
             },
 
-            deleteProduct(prodId){
-                return this.deleteOne({_id: prodId})
+            deleteProduct(prodId) {
+                return this.deleteOne({ _id: prodId })
             },
         }
     }
 );
 
-module.exports =  mongoose.model('products',ProductsSchema);
+module.exports = mongoose.model('products', ProductsSchema);
