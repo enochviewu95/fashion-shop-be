@@ -5,7 +5,8 @@ const BannerSchema = new Schema(
     {
         title: String,
         description: String,
-        imageUrl: String
+        imageUrl: String,
+        isSelected: Boolean
     },
     {
         methods: {
