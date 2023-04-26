@@ -2,6 +2,7 @@ const Product = require("../models/product");
 const Collection = require("../models/collection");
 const User = require("../models/user");
 const Banner = require("../models/banner");
+const Category = require('../models/categories')
 
 const SUCCESSMSG = "success";
 const FAILEDMSG = "failed";
@@ -324,3 +325,80 @@ exports.deleteUser = (req, res, next) => {
 };
 
 /*<=========================END OF USER CONTROLLERS====================>*/
+
+/*<========================Category CONTROLLERS====================>*/
+
+/* The above code is defining a function called `postCategory` that handles a POST request to create a
+new category. It extracts the `title`, `description`, and `imageUrl` from the request body, creates
+a new `Category` object with those values, and calls the `createCategory` method on that object. If
+the category is successfully created, it sends a JSON response with a success message. If there is
+an error, it sends a JSON response with a failure message and the error message. */
+exports.postCategory = (req, res, next) => {
+  const title = req.body.title;
+  const description = req.body.description;
+  const imageUrl = req.body.imageUrl;
+  const category = new Category({ title, description, imageUrl });
+  category
+    .createCategory()
+    .then(() => {
+      res.json({ response: SUCCESSMSG });
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
+/* The above code is defining an exported function called `getCategories` that takes in a request,
+response, and next middleware function as parameters. Inside the function, it calls a method
+`getCategories()` from a `Category` object, which is expected to return a promise. If the promise is
+resolved, it sends a JSON response with a status code of 200 and the result as the response body. If
+the promise is rejected, it sends a JSON response with a custom message and the error message as the
+response body. */
+exports.getCategories = (req, res, next) => {
+  Category.getCategories()
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
+/* The above code is defining an `editCategory` function that handles a PUT request to update a
+category in a web application. It extracts the updated category information from the request body
+and the category ID from the request parameters. It then calls the `udpateCategory` method of the
+`Category` model to update the category with the given ID with the new information. If the update is
+successful, it sends a JSON response with a success message. If there is an error, it sends a JSON
+response with a failure message and the error message. */
+exports.editCategory = (req, res, next) => {
+  const updatedCategory = {
+    title: req.body.title,
+    description: req.body.description,
+    imageUrl: req.body.imageUrl,
+  };
+  const categoryId = req.params.categoryId;
+  console.log(updatedCategory, categoryId);
+  Category.udpateCategory(categoryId, updatedCategory)
+    .then(() => {
+      res.json({ response: SUCCESSMSG });
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
+/* The above code is defining an Express route handler function that handles a DELETE request to delete
+a category. It extracts the category ID from the request parameters, calls the `deleteCategory`
+method of the `Category` model to delete the category with the given ID, and sends a JSON response
+indicating success or failure. */
+exports.deleteCategory = (req, res, next) => {
+  const categoryId = req.params.categoryId;
+  Category.deleteCategory(categoryId)
+    .then(() => {
+      res.json({ response: SUCCESSMSG });
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+

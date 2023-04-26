@@ -9,4 +9,6 @@ router.get("/", (req, res, next) => {
 /* GET home page. */
 router.get("/get-products", shopController.getProducts);
 
+router.get("/get-banner",shopController.getSelectedBanner)
+
 module.exports = router;

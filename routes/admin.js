@@ -119,4 +119,31 @@ router.delete('/delete-user/:userId',adminController.deleteUser)
 
 /*<=========================END OF USER ROUTERS====================>*/
 
+/*<=========================CATEGORY ROUTERS====================>*/
+/* `router.post('/add-category',adminController.postCategory)` is creating a route for the HTTP POST
+request method on the path '/add-category' of the application. When a POST request is made to this
+route, the `postCategory` function from the `adminController` module will be executed. This route is
+typically used to add a new category to the application. */
+router.post('/add-category',adminController.postCategory)
+
+/* `router.get('/get-categories',adminController.getCategories)` is creating a route for the HTTP GET
+request method on the path '/get-categories' of the application. When a GET request is made to this
+route, the `getCategories` function from the `adminController` module will be executed. This route
+is typically used to retrieve all categories from the application. */
+router.get('/get-categories',adminController.getCategories)
+
+/* `router.put('/edit-category/:categoryId',adminController.editCategory)` is creating a route for the
+HTTP PUT request method on the path '/edit-category/:categoryId' of the application. When a PUT
+request is made to this route with a specific `categoryId` parameter, the `editCategory` function
+from the `adminController` module will be executed. This route is typically used to update an
+existing category in the application. */
+router.put('/edit-category/:categoryId',adminController.editCategory)
+
+/* `router.delete('/delete-category/:categoryId',adminController.deleteCategory)` is creating a route
+for the HTTP DELETE request method on the path '/delete-category/:categoryId' of the application.
+When a DELETE request is made to this route with a specific `categoryId` parameter, the
+`deleteCategory` function from the `adminController` module will be executed. This route is
+typically used to delete an existing category from the application. */
+router.delete('/delete-category/:categoryId',adminController.deleteCategory)
+
 module.exports = router;

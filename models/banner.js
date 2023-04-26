@@ -26,6 +26,10 @@ const BannerSchema = new Schema(
 
             deleteBanner(bannerId) {
                 return this.deleteOne({ _id: bannerId })
+            },
+
+            getSelectedBanner(){
+                return this.findOne({isSelected: true})
             }
         }
     }
