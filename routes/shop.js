@@ -11,4 +11,6 @@ router.get("/get-products", shopController.getProducts);
 
 router.get("/get-banner",shopController.getSelectedBanner)
 
+router.get("/get-categories",shopController.getCategories)
+
 module.exports = router;

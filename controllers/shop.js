@@ -1,5 +1,6 @@
 const Product = require("../models/product")
 const Banner = require('../models/banner');
+const Category = require('../models/categories')
 
 exports.getProducts = (req, res, next) => {
     Product.getProducts()
@@ -20,4 +21,14 @@ exports.getSelectedBanner = (req, res, next)=>{
         console.log(err)
     })
 }
+
+exports.getCategories = (req, res, next) => {
+    Category.getCategories()
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((err) => {
+        res.json({ response: FAILEDMSG, msg: err });
+      });
+  };
 
