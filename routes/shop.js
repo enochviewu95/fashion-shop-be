@@ -13,4 +13,6 @@ router.get("/get-banner",shopController.getSelectedBanner)
 
 router.get("/get-categories",shopController.getCategories)
 
+router.get("/get-collections",shopController.getCollections)
+
 module.exports = router;

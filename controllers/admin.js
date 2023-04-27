@@ -95,7 +95,8 @@ logs the error to the console. */
 exports.postCollection = (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file
+  const imageUrl = image.path;
   const product = new Collection({ title, description, imageUrl });
   product
     .createCollection()
@@ -336,7 +337,8 @@ an error, it sends a JSON response with a failure message and the error message.
 exports.postCategory = (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
+  const imageUrl = image.path;
   const category = new Category({ title, description, imageUrl });
   category
     .createCategory()
