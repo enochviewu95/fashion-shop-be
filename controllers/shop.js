@@ -6,7 +6,8 @@ const Collection = require('../models/collection')
 exports.getProducts = (req, res, next) => {
     Product.getProducts()
     .then(result=>{
-        res.status(200).json({result})
+      console.log('Product',result)
+        res.status(200).json(result)
     })
     .catch(err=>{
        console.log(err)
@@ -16,7 +17,7 @@ exports.getProducts = (req, res, next) => {
 exports.getSelectedBanner = (req, res, next)=>{
     Banner.getSelectedBanner()
     .then(result=>{
-        res.status(200).json({result})
+        res.status(200).json(result)
     })
     .catch(err=>{
         console.log(err)
@@ -42,4 +43,5 @@ exports.getCategories = (req, res, next) => {
       res.json({ response: FAILEDMSG, msg: err });
     });
   }
+
 

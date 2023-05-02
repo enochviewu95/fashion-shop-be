@@ -31,7 +31,8 @@ result to the console. If there is an error, it logs the error to the console. *
 exports.postProducts = (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
+  const imageUrl = image.path;
   const price = req.body.price;
   const product = new Product({ title, description, imageUrl, price });
   product
