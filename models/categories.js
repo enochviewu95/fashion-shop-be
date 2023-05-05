@@ -15,6 +15,10 @@ const CategorySchema = new Schema(
         },
 
         statics: {
+
+            getCategory(categoryId){
+                return this.findById({_id: categoryId})
+            },
             getCategories() {
                 return this.find();
             },

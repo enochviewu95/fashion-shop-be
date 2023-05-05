@@ -16,6 +16,13 @@ route, the `postProducts` function from the `adminController` module will be exe
 typically used to add a new product to the application. */
 router.post('/add-product',adminController.postProducts)
 
+/* `router.get('/get-product/:productId',adminController.getProduct)` is creating a route for the HTTP
+GET request method on the path '/get-product/:productId' of the application. When a GET request is
+made to this route with a specific `productId` parameter, the `getProduct` function from the
+`adminController` module will be executed. This route is typically used to retrieve a specific
+product from the application based on its `productId`. */
+router.get('/get-product/:productId',adminController.getProduct)
+
 /* `router.put('/edit-product',adminController.editProduct)` is creating a route for the HTTP PUT
 request method on the path '/edit-product' of the application. When a PUT request is made to this
 route, the `editProduct` function from the `adminController` module will be executed. This route is
@@ -131,6 +138,8 @@ request method on the path '/get-categories' of the application. When a GET requ
 route, the `getCategories` function from the `adminController` module will be executed. This route
 is typically used to retrieve all categories from the application. */
 router.get('/get-categories',adminController.getCategories)
+
+router.get('/get-category/:categoryId',adminController.getCategory)
 
 /* `router.put('/edit-category/:categoryId',adminController.editCategory)` is creating a route for the
 HTTP PUT request method on the path '/edit-category/:categoryId' of the application. When a PUT

@@ -19,9 +19,20 @@ exports.getProducts = (req, res, next) => {
       res.status(200).json(result);
     })
     .catch((err) => {
-      console.log(err);
+      res.json({ response: FAILEDMSG, msg: err });
     });
 };
+
+exports.getProduct = (req, res, next)=>{
+  const prodId = req.params.productId;
+  Product.getProduct(prodId)
+  .then((result) => {
+    res.status(200).json(result);
+  })
+  .catch((err)=>{
+    res.json({ response: FAILEDMSG, msg: err });
+  })
+}
 
 /* This code exports a function named `postProducts` that handles a POST request to create a new
 product in the database. It extracts the `title`, `description`, and `imageUrl` from the request
@@ -366,6 +377,17 @@ exports.getCategories = (req, res, next) => {
       res.json({ response: FAILEDMSG, msg: err });
     });
 };
+
+exports.getCategory = (req, res, next)=>{
+  const categoryId = req.params.categoryId;
+  Category.getCategory(categoryId)
+  .then(result=>{
+    res.status(200).json(result);
+  })
+  .catch(err=>{
+    res.json({response: FAILEDMSG, msg:err})
+  })
+}
 
 /* The above code is defining an `editCategory` function that handles a PUT request to update a
 category in a web application. It extracts the updated category information from the request body

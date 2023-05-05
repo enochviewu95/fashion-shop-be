@@ -21,6 +21,10 @@ const ProductsSchema = new Schema(
                 return this.find();
             },
 
+            getProduct(prodId){
+                return this.findById({_id: prodId})
+            },
+
             updateProduct(prodId, update) {
                 return this.findOneAndUpdate({ _id: prodId }, update)
             },
