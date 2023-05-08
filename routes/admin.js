@@ -26,7 +26,7 @@ router.get("/get-product/:productId", adminController.getProduct);
 request method on the path '/edit-product' of the application. When a PUT request is made to this
 route, the `editProduct` function from the `adminController` module will be executed. This route is
 typically used to update an existing product in the application. */
-router.put("/edit-product/:productId", adminController.editProduct);
+router.post("/edit-product/:productId", adminController.editProduct);
 
 /* `router.delete('/delete-product/:productId',adminController.deleteProduct)` is creating a route for
 the HTTP DELETE request method on the path '/delete-product/:productId' of the application. When a
@@ -55,7 +55,12 @@ for the HTTP PUT request method on the path '/edit-collection/:collectionId' of 
 When a PUT request is made to this route with a specific `collectionId` parameter, the
 `editCollection` function from the `adminController` module will be executed. This route is
 typically used to update an existing collection in the application. */
-router.put("/edit-collection/:collectionId", adminController.editCollection);
+router.post("/edit-collection/:collectionId", adminController.editCollection);
+
+/* The above code is defining a route for a GET request to retrieve a specific collection by its ID.
+The route is defined using the Express router and is handled by the `getCollection` function in the
+`adminController`. */
+router.get("/get-collection/:collectionId", adminController.getCollection);
 
 /* `router.delete('/delete-collection/:collectionId',adminController.deleteCollection)` is creating a
 route for the HTTP DELETE request method on the path '/delete-collection/:collectionId' of the
@@ -167,7 +172,7 @@ HTTP PUT request method on the path '/edit-category/:categoryId' of the applicat
 request is made to this route with a specific `categoryId` parameter, the `editCategory` function
 from the `adminController` module will be executed. This route is typically used to update an
 existing category in the application. */
-router.put("/edit-category/:categoryId", adminController.editCategory);
+router.post("/edit-category/:categoryId", adminController.editCategory);
 
 /* `router.delete('/delete-category/:categoryId',adminController.deleteCategory)` is creating a route
 for the HTTP DELETE request method on the path '/delete-category/:categoryId' of the application.

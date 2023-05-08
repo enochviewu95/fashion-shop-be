@@ -62,14 +62,23 @@ the request parameters. It then calls the `updateProduct` method of the `Product
 the product in the database. If the operation is successful, it sends a JSON response with a success
 message using the `res.json` method. If there is an error, it logs the error to the console. */
 exports.editProduct = (req, res, next) => {
-  const updatedProduct = {
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-    price: req.body.price,
-  };
   const prodId = req.params.productId;
-  Product.updateProduct(prodId, updatedProduct)
+  const title = req.body.title;
+  const description = req.body.description;
+  const image = req.file;
+  const imageUrl = image !== undefined ? image.path : "";
+  const price = req.body.price;
+
+  console.log("Price", price);
+
+  Product.findById({ _id: prodId })
+    .then((product) => {
+      product.title = title;
+      product.description = description;
+      product.price = price;
+      product.imageUrl = imageUrl !== "" ? imageUrl : product.imageUrl;
+      return product.save();
+    })
     .then(() => {
       res.json({ response: SUCCESSMSG });
     })
@@ -134,6 +143,17 @@ exports.getCollections = (req, res, next) => {
     });
 };
 
+exports.getCollection = (req, res, next) => {
+  const collectionId = req.params.collectionId;
+  Collection.getCollection(collectionId)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
 /* `exports.editCollection` is a function that handles a PUT request to update an existing collection
 in the database. It extracts the updated collection information from the request body and the
 collection ID from the request parameters. It then calls the `updateProduct` method of the `Product`
@@ -141,14 +161,19 @@ model to update the collection in the database. If the operation is successful, 
 response with a success message using the `res.json` method. If there is an error, it logs the error
 to the console. */
 exports.editCollection = (req, res, next) => {
-  const updatedCollection = {
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-  };
   const collectionId = req.params.collectionId;
-  console.log(updatedCollection, collectionId);
-  Collection.udpateCollection(collectionId, updatedCollection)
+  const title = req.body.title;
+  const description = req.body.description;
+  const image = req.file;
+  const imageUrl = image !== undefined ? image.path : "";
+
+  Collection.findById({ _id: collectionId })
+    .then((collection) => {
+      collection.title = title;
+      collection.description = description;
+      collection.imageUrl = imageUrl !== "" ? imageUrl : collection.imageUrl;
+      return collection.save();
+    })
     .then(() => {
       res.json({ response: SUCCESSMSG });
     })
@@ -239,7 +264,7 @@ exports.editBanner = (req, res, next) => {
     .then((banner) => {
       banner.title = title;
       banner.descripton = description;
-      banner.imageUrl = imageUrl !=="" ? imageUrl : banner.imageUrl;
+      banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
       banner.isSelected = isSelected;
       return banner.save();
     })
@@ -430,14 +455,19 @@ and the category ID from the request parameters. It then calls the `udpateCatego
 successful, it sends a JSON response with a success message. If there is an error, it sends a JSON
 response with a failure message and the error message. */
 exports.editCategory = (req, res, next) => {
-  const updatedCategory = {
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-  };
   const categoryId = req.params.categoryId;
-  console.log(updatedCategory, categoryId);
-  Category.udpateCategory(categoryId, updatedCategory)
+  const title = req.body.title;
+  const description = req.body.description;
+  const image = req.file;
+  const imageUrl = image !== undefined ? image.path : "";
+
+  Category.findById({ _id: categoryId })
+    .then((category) => {
+      category.title = title;
+      category.description = description;
+      category.imageUrl = imageUrl !== "" ? imageUrl : category.imageUrl;
+      return category.save();
+    })
     .then(() => {
       res.json({ response: SUCCESSMSG });
     })
