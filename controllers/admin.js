@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const Collection = require("../models/collection");
 const User = require("../models/user");
 const Banner = require("../models/banner");
-const Category = require('../models/categories')
+const Category = require("../models/categories");
 
 const SUCCESSMSG = "success";
 const FAILEDMSG = "failed";
@@ -23,16 +23,16 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.getProduct = (req, res, next)=>{
+exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.getProduct(prodId)
-  .then((result) => {
-    res.status(200).json(result);
-  })
-  .catch((err)=>{
-    res.json({ response: FAILEDMSG, msg: err });
-  })
-}
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
 
 /* This code exports a function named `postProducts` that handles a POST request to create a new
 product in the database. It extracts the `title`, `description`, and `imageUrl` from the request
@@ -107,7 +107,7 @@ logs the error to the console. */
 exports.postCollection = (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
-  const image = req.file
+  const image = req.file;
   const imageUrl = image.path;
   const product = new Collection({ title, description, imageUrl });
   product
@@ -227,14 +227,22 @@ banner in the database. If the operation is successful, it sends a JSON response
 message using the `res.json` method. If there is an error, it sends a JSON response with an error
 message using the `res.json` method. */
 exports.editBanner = (req, res, next) => {
-  const updatedBanner = {
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-  };
-
   const bannerId = req.params.bannerId;
-  Banner.updateBanner(bannerId, updatedBanner)
+  const title = req.body.title;
+  const description = req.body.description;
+  const image = req.file;
+  const isSelected = false;
+  console.log("Image url", image);
+  const imageUrl = image !== undefined ? image.path : "";
+
+  Banner.findById({ _id: bannerId })
+    .then((banner) => {
+      banner.title = title;
+      banner.descripton = description;
+      banner.imageUrl = imageUrl !=="" ? imageUrl : banner.imageUrl;
+      banner.isSelected = isSelected;
+      return banner.save();
+    })
     .then(() => {
       res.json({ response: SUCCESSMSG });
     })
@@ -253,6 +261,32 @@ exports.deleteBanner = (req, res, next) => {
   Banner.deleteBanner(bannerId)
     .then(() => {
       res.json({ response: SUCCESSMSG });
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
+exports.getBanner = (req, res, next) => {
+  const bannerId = req.params.bannerId;
+  Banner.getBanner(bannerId)
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
+
+exports.updateSelectedBanner = (req, res, next) => {
+  const bannerId = req.params.bannerId;
+  Banner.updateOne({ isSelected: true }, { $set: { isSelected: false } })
+    .then((result) => {
+      Banner.updateOne({ _id: bannerId }, { $set: { isSelected: true } }).then(
+        () => {
+          res.json({ response: SUCCESSMSG });
+        }
+      );
     })
     .catch((err) => {
       res.json({ response: FAILEDMSG, msg: err });
@@ -378,16 +412,16 @@ exports.getCategories = (req, res, next) => {
     });
 };
 
-exports.getCategory = (req, res, next)=>{
+exports.getCategory = (req, res, next) => {
   const categoryId = req.params.categoryId;
   Category.getCategory(categoryId)
-  .then(result=>{
-    res.status(200).json(result);
-  })
-  .catch(err=>{
-    res.json({response: FAILEDMSG, msg:err})
-  })
-}
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.json({ response: FAILEDMSG, msg: err });
+    });
+};
 
 /* The above code is defining an `editCategory` function that handles a PUT request to update a
 category in a web application. It extracts the updated category information from the request body
@@ -426,4 +460,3 @@ exports.deleteCategory = (req, res, next) => {
       res.json({ response: FAILEDMSG, msg: err });
     });
 };
-
