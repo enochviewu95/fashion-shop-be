@@ -1,35 +1,47 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const UserSchema = new Schema(
-    {
-        name: String,
-        email: String,
-        
+  {
+    email: {
+      type: String,
+      required: true,
     },
-    {
-        methods: {
-            createUser() {
-                return this.save(this)
-            }
-        },
+    password: {
+      type: String,
+      required: true,
+    },
 
-        statics: {
-            getUser(userId) {
-                console.log("Userid",userId)
-                return this.find({_id: userId});
-            },
+    firstname: {
+      type: String,
+      required: true,
+    },
+    lastname: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    methods: {
+      createUser() {
+        return this.save(this);
+      },
+    },
 
-            updateUser(userId, update) {
-                return this.findOneAndUpdate({ _id: userId }, update)
-            },
+    statics: {
+      getUser(email) {
+        return this.findOne({ email: email });
+      },
 
-            deleteUser(collectionId) {
-                return this.deleteOne({ _id: collectionId })
-            }
-        }
-    }
+      updateUser(userId, update) {
+        return this.findOneAndUpdate({ _id: userId }, update);
+      },
 
+      deleteUser(collectionId) {
+        return this.deleteOne({ _id: collectionId });
+      },
+    },
+  }
 );
 
-module.exports = mongoose.model('users', UserSchema);
+module.exports = mongoose.model("users", UserSchema);

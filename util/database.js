@@ -1,15 +1,8 @@
 const { default: mongoose } = require('mongoose');
 require('dotenv').config()
-const USERNAME = process.env.USER;
-const HOST = process.env.HOST;
-const COLLECTION = process.env.COLLECTION;
-const RETRYWRITES= process.env.RETRYWRITES;
-const W = process.env.W;
-const PASSWORD = process.env.PASSWORD;
-
 const mongooseConnect = (callback)=>{
     mongoose
-    .connect(`mongodb+srv://${USERNAME}:${PASSWORD}${HOST}/${COLLECTION}?retryWrites=${RETRYWRITES}&w=${W}`)
+    .connect(process.env.MONGODB_URI)
     .then(client=>{
         _mongoose = client;
         callback(client)
@@ -18,7 +11,6 @@ const mongooseConnect = (callback)=>{
         handleError(err)
     })
 }
-
 
 const handleError = (err)=>{
     console.log(err);
