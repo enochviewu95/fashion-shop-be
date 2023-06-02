@@ -9,7 +9,7 @@ const UserSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
     },
 
     firstname: {
@@ -17,6 +17,18 @@ const UserSchema = new Schema(
       required: true,
     },
     lastname: {
+      type: String,
+      required: true,
+    },
+    googleId: {
+      type: String,
+      required: false,
+    },
+    provider: {
+      type: String,
+      required: true,
+    },
+    role: {
       type: String,
       required: true,
     },
@@ -37,8 +49,8 @@ const UserSchema = new Schema(
         return this.findOneAndUpdate({ _id: userId }, update);
       },
 
-      deleteUser(collectionId) {
-        return this.deleteOne({ _id: collectionId });
+      deleteUser(userId) {
+        return this.deleteOne({ _id: userId });
       },
     },
   }

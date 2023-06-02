@@ -8,7 +8,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const logger = require("morgan");
 const cors = require("cors");
 const multer = require("multer");
-const User = require("./models/user");
+const Shop = require("./models/shop");
 
 const shopRouter = require("./routes/shop");
 const adminRouter = require("./routes/admin");
@@ -22,10 +22,12 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-app.use(cors({
-  origin: process.env.ORIGIN,
-  credentials:true
-}));
+app.use(
+  cors({
+    origin: process.env.ORIGIN,
+    credentials: true,
+  })
+);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -82,17 +84,10 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(passport.initialize());
 app.use(passport.session());
-require("./middlewares/passportconfig")(passport);
+require("./middlewares/google-passport-config")(passport);
+require("./middlewares/local-passport-config")(passport);
 
-app.use((req, res, next) => {
-  if (!req.user) {
-    return next();
-  }
-  res.locals.isAuthenticated = req.user.isLoggedIn;
-  next();
-});
-
-app.use("/auth/api", authRouter);
+app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
 

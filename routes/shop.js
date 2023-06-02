@@ -6,13 +6,15 @@ router.get("/", (req, res, next) => {
   res.render("index", { title: "Express" });
 });
 
-/* GET home page. */
-router.get("/get-products", shopController.getProducts);
+router.get("/get-shop", shopController.getShopItems)
 
-router.get("/get-banner",shopController.getSelectedBanner)
+// /* GET home page. */
+// router.get("/get-products", shopController.getProducts);
 
-router.get("/get-categories",shopController.getCategories)
+// router.get("/get-banner",shopController.getSelectedBanner)
 
-router.get("/get-collections",shopController.getCollections)
+// router.get("/get-categories",shopController.getCategories)
+
+// router.get("/get-collections",shopController.getCollections)
 
 module.exports = router;

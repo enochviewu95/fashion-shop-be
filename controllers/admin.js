@@ -3,6 +3,7 @@ const Collection = require("../models/collection");
 const User = require("../models/user");
 const Banner = require("../models/banner");
 const Category = require("../models/categories");
+const Shop = require("../models/shop")
 
 const SUCCESSMSG = "success";
 const FAILEDMSG = "failed";
@@ -68,8 +69,6 @@ exports.editProduct = (req, res, next) => {
   const image = req.file;
   const imageUrl = image !== undefined ? image.path : "";
   const price = req.body.price;
-
-  console.log("Price", price);
 
   Product.findById({ _id: prodId })
     .then((product) => {
@@ -266,6 +265,9 @@ exports.editBanner = (req, res, next) => {
       banner.descripton = description;
       banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
       banner.isSelected = isSelected;
+      if(isSelected){
+        Shop.save()
+      }
       return banner.save();
     })
     .then(() => {

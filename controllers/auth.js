@@ -23,6 +23,8 @@ exports.postSignup = (req, res, next) => {
   const password = req.body.password;
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
+  const provider = "local"
+  const role="client"
   User.getUser(email)
     .then((userDoc) => {
       if (userDoc) {
@@ -37,6 +39,8 @@ exports.postSignup = (req, res, next) => {
             password: hashedPassword,
             firstname: firstname,
             lastname: lastname,
+            provider: provider,
+            role:role
           });
 
           return user.save();
@@ -55,9 +59,19 @@ exports.postSignup = (req, res, next) => {
 
 exports.postLogout = (req, res, next) => {
   req.logout((err) => {
-    if (err) {
-      return res.json({ response: FAILEDMSG, msg: err });
-    }
+    if (err) next(err);
     res.json({ response: SUCCESSMSG });
   });
+};
+
+exports.getUser = (req, res, next) => {
+  if (req.user) {
+    return res.status(200).json({
+      email: req.user.email,
+      firstname: req.user.firstname,
+      lastname: req.user.lastname,
+      role: req.user.role
+    });
+  }
+  return res.status(200).json({});
 };

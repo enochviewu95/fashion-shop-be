@@ -10,16 +10,16 @@ module.exports = function (passport) {
         User.findOne({ email: username })
           .then((user) => {
             if (!user) {
-              return done(null, false, {
+              done(null, false, {
                 message: "Incorrect email or password.",
               });
             }
             bcrypt.compare(password, user.password, (err, result) => {
               if (err) done(err);
               if (result === true) {
-                return done(null, user);
+                done(null, user);
               } else {
-                return done(null, false);
+                done(null, false,{message: "Incorrect email or password."});
               }
             });
           })
@@ -32,18 +32,15 @@ module.exports = function (passport) {
 
   passport.serializeUser(function (user, done) {
     process.nextTick(function () {
-      done(null, { _id: user.id, isLoggedIn: true });
+      done(null, { id: user.id });
     });
   });
 
   passport.deserializeUser(function (user, done) {
     process.nextTick(function () {
-      usersession = {};
-      usersession.isLoggedIn = user.isLoggedIn;
-      User.findOne({ _id: user._id })
+      User.findOne({ _id: user.id })
         .then((user) => {
-          usersession.user = user;
-          done(null, usersession);
+          done(null, user);
         })
         .catch((err) => {
           done(err);
