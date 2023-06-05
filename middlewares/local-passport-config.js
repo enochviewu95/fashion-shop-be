@@ -29,22 +29,4 @@ module.exports = function (passport) {
       }
     )
   );
-
-  passport.serializeUser(function (user, done) {
-    process.nextTick(function () {
-      done(null, { id: user.id });
-    });
-  });
-
-  passport.deserializeUser(function (user, done) {
-    process.nextTick(function () {
-      User.findOne({ _id: user.id })
-        .then((user) => {
-          done(null, user);
-        })
-        .catch((err) => {
-          done(err);
-        });
-    });
-  });
 };

@@ -32,6 +32,10 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+
+    resetToken: String,
+
+    resetTokenExpiration: Date
   },
   {
     methods: {

@@ -8,7 +8,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const logger = require("morgan");
 const cors = require("cors");
 const multer = require("multer");
-const Shop = require("./models/shop");
+const User = require("./models/user");
 
 const shopRouter = require("./routes/shop");
 const adminRouter = require("./routes/admin");
@@ -84,8 +84,29 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(passport.initialize());
 app.use(passport.session());
-require("./middlewares/google-passport-config")(passport);
+
 require("./middlewares/local-passport-config")(passport);
+require("./middlewares/google-passport-config")(passport);
+
+passport.serializeUser(function (user, done) {
+  process.nextTick(function () {
+    done(null, { id: user._id });
+  });
+});
+
+passport.deserializeUser(function (user, done) {
+  process.nextTick(function () {
+    User.findOne({ _id: user.id })
+    .then((user) => {
+        console.log('Deserialized',user)
+        done(null, user);
+      })
+      .catch((err) => {
+        done(err);
+      });
+  });
+});
+
 
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);

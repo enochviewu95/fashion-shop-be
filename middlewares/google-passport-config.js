@@ -23,8 +23,8 @@ module.exports = function (passport) {
               });
               user
                 .createUser()
-                .then(() => {
-                  done(null, profile);
+                .then((response) => {
+                  done(null, response);
                 })
                 .catch((err) => {
                   done(err);
@@ -39,22 +39,4 @@ module.exports = function (passport) {
       }
     )
   );
-
-  passport.serializeUser(function (user, done) {
-    process.nextTick(function () {
-      done(null, { id: user.googleId });
-    });
-  });
-
-  passport.deserializeUser(function (user, done) {
-    process.nextTick(function () {
-      User.findOne({ googleId: user.id })
-        .then((user) => {
-          done(null, user);
-        })
-        .catch((err) => {
-          done(err);
-        });
-    });
-  });
 };
