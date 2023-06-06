@@ -98,7 +98,6 @@ passport.deserializeUser(function (user, done) {
   process.nextTick(function () {
     User.findOne({ _id: user.id })
     .then((user) => {
-        console.log('Deserialized',user)
         done(null, user);
       })
       .catch((err) => {

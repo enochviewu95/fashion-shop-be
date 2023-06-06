@@ -16,19 +16,6 @@ const transporter = nodemailer.createTransport(
   })
 );
 
-exports.postLogin = (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) return res.json({ response: FAILEDMSG, msg: err });
-    if (!user) return res.json({ respone: "Invalid email or password" });
-    else {
-      req.logIn(user, (err) => {
-        if (err) return res.json({ response: FAILEDMSG, msg: err });
-        return res.json({ response: SUCCESSMSG, msg: info });
-      });
-    }
-  })(req, res, next);
-};
-
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -79,15 +66,19 @@ exports.postLogout = (req, res, next) => {
 
 exports.getUser = (req, res, next) => {
   if (req.user) {
-    console.log('User',req.user)
-    return res.status(200).json({
-      email: req.user.email,
-      firstname: req.user.firstname,
-      lastname: req.user.lastname,
-      role: req.user.role,
+    res.status(200).json({
+      status: SUCCESSMSG,
+      msg:"Login successful",
+      user: {
+        email: req.user.email,
+        firstname: req.user.firstname,
+        lastname: req.user.lastname,
+        role: req.user.role,
+      },
     });
+  }else{
+    res.status(200).json({ status: FAILEDMSG, msg:"Your credentials are incorrect" });
   }
-  return res.status(200).json({});
 };
 
 exports.postReset = (req, res, next) => {
@@ -153,10 +144,10 @@ exports.postPassword = (req, res, next) => {
       resetUser.password = hashedPassword;
       resetUser.resetToken = undefined;
       resetUser.resetTokenExpiration = undefined;
-      return resetUser.save()
+      return resetUser.save();
     })
-    .then(()=>{
-      res.json({response:SUCCESSMSG, msg:"Password reset successful"})
+    .then(() => {
+      res.json({ response: SUCCESSMSG, msg: "Password reset successful" });
     })
     .catch((err) => {
       return res.json({ response: FAILEDMSG, msg: err });
