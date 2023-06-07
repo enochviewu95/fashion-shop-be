@@ -255,19 +255,16 @@ exports.editBanner = (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
-  const isSelected = false;
-  console.log("Image url", image);
+  const isSelected = req.body.selected;
+  console.log("Image url", isSelected);
   const imageUrl = image !== undefined ? image.path : "";
 
   Banner.findById({ _id: bannerId })
     .then((banner) => {
       banner.title = title;
-      banner.descripton = description;
+      banner.description = description;
       banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
       banner.isSelected = isSelected;
-      if(isSelected){
-        Shop.save()
-      }
       return banner.save();
     })
     .then(() => {

@@ -2,7 +2,6 @@ const express = require("express");
 const authController = require("../controllers/auth");
 const passport = require("passport");
 const router = express.Router();
-const isLoggedIn = require("../middlewares/is-LoggedIn");
 
 router.get(
   "/google/callback",
