@@ -3,7 +3,8 @@ const Collection = require("../models/collection");
 const User = require("../models/user");
 const Banner = require("../models/banner");
 const Category = require("../models/categories");
-const Shop = require("../models/shop")
+
+const { convertImage } = require("../util/image-converter");
 
 const SUCCESSMSG = "success";
 const FAILEDMSG = "failed";
@@ -14,7 +15,7 @@ const FAILEDMSG = "failed";
 from the database. It calls the `getProducts` method of the `Product` model to retrieve the
 products, and then sends the result as a JSON response using the `res.json` method. If there is an
 error, it logs the error to the console. */
-exports.getProducts = (req, res, next) => {
+exports.getProducts = (req, res) => {
   Product.getProducts()
     .then((result) => {
       res.status(200).json(result);
@@ -24,7 +25,7 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.getProduct = (req, res, next) => {
+exports.getProduct = (req, res) => {
   const prodId = req.params.productId;
   Product.getProduct(prodId)
     .then((result) => {
@@ -40,12 +41,13 @@ product in the database. It extracts the `title`, `description`, and `imageUrl` 
 body, creates a new `Product` object with these values, and calls the `createProduct` method of the
 `Product` model to save the new product to the database. If the operation is successful, it logs the
 result to the console. If there is an error, it logs the error to the console. */
-exports.postProducts = (req, res, next) => {
+exports.postProducts = async (req, res) => {
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
   const imageUrl = image.path;
   const price = req.body.price;
+
   const product = new Product({ title, description, imageUrl, price });
   product
     .createProduct()
@@ -62,7 +64,7 @@ database. It extracts the updated product information from the request body and 
 the request parameters. It then calls the `updateProduct` method of the `Product` model to update
 the product in the database. If the operation is successful, it sends a JSON response with a success
 message using the `res.json` method. If there is an error, it logs the error to the console. */
-exports.editProduct = (req, res, next) => {
+exports.editProduct = (req, res) => {
   const prodId = req.params.productId;
   const title = req.body.title;
   const description = req.body.description;
@@ -91,7 +93,7 @@ from the database. It extracts the `productId` from the request parameters, call
 `deleteProduct` method of the `Product` model to delete the product from the database. If the
 operation is successful, it sends a JSON response with a success message using the `res.json`
 method. If there is an error, it logs the error to the console. */
-exports.deleteProduct = (req, res, next) => {
+exports.deleteProduct = (req, res) => {
   const prodId = req.params.productId;
   Product.deleteProduct(prodId)
     .then(() => {
@@ -112,7 +114,7 @@ new `Collection` object with these values, and calls the `createCollection` meth
 `Collection` model to save the new collection to the database. If the operation is successful, it
 sends a JSON response with a success message using the `res.json` method. If there is an error, it
 logs the error to the console. */
-exports.postCollection = (req, res, next) => {
+exports.postCollection = (req, res) => {
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
@@ -132,7 +134,7 @@ exports.postCollection = (req, res, next) => {
 the database. It calls the `getCollections` method of the `Collection` model to retrieve the
 collections, and then sends the result as a JSON response using the `res.json` method. If there is
 an error, it logs the error to the console. */
-exports.getCollections = (req, res, next) => {
+exports.getCollections = (req, res) => {
   Collection.getCollections()
     .then((result) => {
       res.status(200).json(result);
@@ -142,7 +144,7 @@ exports.getCollections = (req, res, next) => {
     });
 };
 
-exports.getCollection = (req, res, next) => {
+exports.getCollection = (req, res) => {
   const collectionId = req.params.collectionId;
   Collection.getCollection(collectionId)
     .then((result) => {
@@ -159,7 +161,7 @@ collection ID from the request parameters. It then calls the `updateProduct` met
 model to update the collection in the database. If the operation is successful, it sends a JSON
 response with a success message using the `res.json` method. If there is an error, it logs the error
 to the console. */
-exports.editCollection = (req, res, next) => {
+exports.editCollection = (req, res) => {
   const collectionId = req.params.collectionId;
   const title = req.body.title;
   const description = req.body.description;
@@ -186,7 +188,7 @@ collection from the database. It extracts the `collectionId` from the request pa
 `deleteProduct` method of the `Collection` model to delete the collection from the database. If the
 operation is successful, it sends a JSON response with a success message using the `res.json`
 method. If there is an error, it logs the error to the console. */
-exports.deleteCollection = (req, res, next) => {
+exports.deleteCollection = (req, res) => {
   const collectionId = req.params.collectionId;
   Collection.deleteCollection(collectionId)
     .then(() => {
@@ -207,7 +209,7 @@ new `Banner` object with these values, and calls the `createBanner` method of th
 save the new banner to the database. If the operation is successful, it sends a JSON response with a
 success message using the `res.json` method. If there is an error, it sends a JSON response with an
 error message using the `res.json` method. */
-exports.postBanner = (req, res, next) => {
+exports.postBanner = (req, res) => {
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
@@ -234,7 +236,7 @@ exports.postBanner = (req, res, next) => {
 database. It calls the `getBanners` method of the `Banner` model to retrieve the banners, and then
 sends the result as a JSON response using the `res.json` method. If there is an error, it sends a
 JSON response with an error message using the `res.json` method. */
-exports.getBanners = (req, res, next) => {
+exports.getBanners = (req, res) => {
   Banner.getBanners()
     .then((result) => {
       res.status(200).json(result);
@@ -250,7 +252,7 @@ the request parameters. It then calls the `updateBanner` method of the `Banner` 
 banner in the database. If the operation is successful, it sends a JSON response with a success
 message using the `res.json` method. If there is an error, it sends a JSON response with an error
 message using the `res.json` method. */
-exports.editBanner = (req, res, next) => {
+exports.editBanner = (req, res) => {
   const bannerId = req.params.bannerId;
   const title = req.body.title;
   const description = req.body.description;
@@ -280,7 +282,7 @@ from the database. It extracts the `bannerId` from the request parameters, calls
 method of the `Banner` model to delete the banner from the database. If the operation is successful,
 it sends a JSON response with a success message using the `res.json` method. If there is an error,
 it sends a JSON response with an error message using the `res.json` method. */
-exports.deleteBanner = (req, res, next) => {
+exports.deleteBanner = (req, res) => {
   const bannerId = req.params.bannerId;
   Banner.deleteBanner(bannerId)
     .then(() => {
@@ -291,7 +293,7 @@ exports.deleteBanner = (req, res, next) => {
     });
 };
 
-exports.getBanner = (req, res, next) => {
+exports.getBanner = (req, res) => {
   const bannerId = req.params.bannerId;
   Banner.getBanner(bannerId)
     .then((result) => {
@@ -302,10 +304,10 @@ exports.getBanner = (req, res, next) => {
     });
 };
 
-exports.updateSelectedBanner = (req, res, next) => {
+exports.updateSelectedBanner = (req, res) => {
   const bannerId = req.params.bannerId;
   Banner.updateOne({ isSelected: true }, { $set: { isSelected: false } })
-    .then((result) => {
+    .then(() => {
       Banner.updateOne({ _id: bannerId }, { $set: { isSelected: true } }).then(
         () => {
           res.json({ response: SUCCESSMSG });
@@ -326,7 +328,7 @@ user. It extracts the `name` and `email` from the request body, creates a new `P
 those values, and calls the `createUser` method on that object. If the user is successfully created,
 it sends a JSON response with a success message. If there is an error, it sends a JSON response with
 a failure message and the error message. */
-exports.postUser = (req, res, next) => {
+exports.postUser = (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const user = new User({ name, email });
@@ -346,7 +348,7 @@ request body and calls a function called `getUser` on the `User` object, passing
 the `getUser` function resolves successfully, it sends a JSON response with a 200 status code and
 the result. If it rejects with an error, it sends a JSON response with a custom message and the
 error. */
-exports.getUser = (req, res, next) => {
+exports.getUser = (req, res) => {
   const userId = req.body.userId;
   User.getUser(userId)
     .then((result) => {
@@ -363,7 +365,7 @@ request parameters. It then calls the `updateUser` method of the `User` model to
 the database. If the operation is successful, it sends a JSON response with a success message using
 the `res.json` method. If there is an error, it sends a JSON response with an error message using
 the `res.json` method. */
-exports.editUser = (req, res, next) => {
+exports.editUser = (req, res) => {
   const updatedUser = {
     name: req.body.name,
     email: req.body.email,
@@ -384,7 +386,7 @@ next as parameters. It then extracts the `userId` from the request body and call
 function of the `User` object with the `userId` as an argument. If the deletion is successful, it
 sends a JSON response with a success message. If there is an error, it sends a JSON response with a
 failure message and the error message. */
-exports.deleteUser = (req, res, next) => {
+exports.deleteUser = (req, res) => {
   const userId = req.params.userId;
   User.deleteUser(userId)
     .then(() => {
@@ -404,7 +406,7 @@ new category. It extracts the `title`, `description`, and `imageUrl` from the re
 a new `Category` object with those values, and calls the `createCategory` method on that object. If
 the category is successfully created, it sends a JSON response with a success message. If there is
 an error, it sends a JSON response with a failure message and the error message. */
-exports.postCategory = (req, res, next) => {
+exports.postCategory = (req, res) => {
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
@@ -426,7 +428,7 @@ response, and next middleware function as parameters. Inside the function, it ca
 resolved, it sends a JSON response with a status code of 200 and the result as the response body. If
 the promise is rejected, it sends a JSON response with a custom message and the error message as the
 response body. */
-exports.getCategories = (req, res, next) => {
+exports.getCategories = (req, res) => {
   Category.getCategories()
     .then((result) => {
       res.status(200).json(result);
@@ -436,7 +438,7 @@ exports.getCategories = (req, res, next) => {
     });
 };
 
-exports.getCategory = (req, res, next) => {
+exports.getCategory = (req, res) => {
   const categoryId = req.params.categoryId;
   Category.getCategory(categoryId)
     .then((result) => {
@@ -453,7 +455,7 @@ and the category ID from the request parameters. It then calls the `udpateCatego
 `Category` model to update the category with the given ID with the new information. If the update is
 successful, it sends a JSON response with a success message. If there is an error, it sends a JSON
 response with a failure message and the error message. */
-exports.editCategory = (req, res, next) => {
+exports.editCategory = (req, res) => {
   const categoryId = req.params.categoryId;
   const title = req.body.title;
   const description = req.body.description;
@@ -479,7 +481,7 @@ exports.editCategory = (req, res, next) => {
 a category. It extracts the category ID from the request parameters, calls the `deleteCategory`
 method of the `Category` model to delete the category with the given ID, and sends a JSON response
 indicating success or failure. */
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = (req, res) => {
   const categoryId = req.params.categoryId;
   Category.deleteCategory(categoryId)
     .then(() => {

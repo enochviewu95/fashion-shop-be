@@ -2,25 +2,26 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/admin");
 const isAuth = require("../middlewares/is-auth")
+
 /*<=========================PRODUCT ROUTERS====================>*/
 
 /* `router.get('/', adminController.getProducts);` is creating a route for the HTTP GET request method
 on the root path ('/') of the application. When a GET request is made to this route, the
 `getProducts` function from the `adminController` module will be executed. */
-router.get("/get-products", isAuth, adminController.getProducts);
+router.get("/get-products", isAuth,adminController.getProducts);
 
 /* `router.post('/add-product',adminController.postProducts)` is creating a route for the HTTP POST
 request method on the path '/add-product' of the application. When a POST request is made to this
 route, the `postProducts` function from the `adminController` module will be executed. This route is
 typically used to add a new product to the application. */
-router.post("/add-product", isAuth,  adminController.postProducts);
+router.post("/add-product", isAuth, adminController.postProducts);
 
 /* `router.get('/get-product/:productId',adminController.getProduct)` is creating a route for the HTTP
 GET request method on the path '/get-product/:productId' of the application. When a GET request is
 made to this route with a specific `productId` parameter, the `getProduct` function from the
 `adminController` module will be executed. This route is typically used to retrieve a specific
 product from the application based on its `productId`. */
-router.get("/get-product/:productId", isAuth,  adminController.getProduct);
+router.get("/get-product/:productId", isAuth, adminController.getProduct);
 
 /* `router.put('/edit-product',adminController.editProduct)` is creating a route for the HTTP PUT
 request method on the path '/edit-product' of the application. When a PUT request is made to this
@@ -42,7 +43,7 @@ router.delete("/delete-product/:productId", isAuth,  adminController.deleteProdu
 request method on the path '/get-collections' of the application. When a GET request is made to this
 route, the `getCollections` function from the `adminController` module will be executed. This route
 is typically used to retrieve all collections from the application. */
-router.get("/get-collections", isAuth,  adminController.getCollections);
+router.get("/get-collections", isAuth, adminController.getCollections);
 
 /* `router.post('/add-collection',adminController.postCollection)` is creating a route for the HTTP
 POST request method on the path '/add-collection' of the application. When a POST request is made to
@@ -60,7 +61,7 @@ router.post("/edit-collection/:collectionId", isAuth,  adminController.editColle
 /* The above code is defining a route for a GET request to retrieve a specific collection by its ID.
 The route is defined using the Express router and is handled by the `getCollection` function in the
 `adminController`. */
-router.get("/get-collection/:collectionId", isAuth,  adminController.getCollection);
+router.get("/get-collection/:collectionId", isAuth, adminController.getCollection);
 
 /* `router.delete('/delete-collection/:collectionId',adminController.deleteCollection)` is creating a
 route for the HTTP DELETE request method on the path '/delete-collection/:collectionId' of the
@@ -79,7 +80,7 @@ router.delete(
 method on the path '/get-banners' of the application. When a GET request is made to this route, the
 `getBanners` function from the `adminController` module will be executed. This route is typically
 used to retrieve all banners from the application. */
-router.get("/get-banners", isAuth,  adminController.getBanners);
+router.get("/get-banners", isAuth,adminController.getBanners);
 
 /* `router.post('/add-banner',adminController.postBanner)` is creating a route for the HTTP POST
 request method on the path '/add-banner' of the application. When a POST request is made to this
@@ -92,7 +93,7 @@ GET request method on the path '/get-banner/:bannerId' of the application. When 
 made to this route with a specific `bannerId` parameter, the `getBanner` function from the
 `adminController` module will be executed. This route is typically used to retrieve a specific
 banner from the application based on its `bannerId`. */
-router.get("/get-banner/:bannerId", isAuth,  adminController.getBanner);
+router.get("/get-banner/:bannerId", isAuth, adminController.getBanner);
 
 /* `router.put("/update-selected/:bannerId", adminController.updateSelectedBanner)` is creating a route
 for the HTTP PUT request method on the path '/update-selected/:bannerId' of the application. When a
@@ -123,7 +124,7 @@ method on the path '/get-user' of the application. When a GET request is made to
 `getBanners` function from the `adminController` module will be executed. However, the route name
 'get-user' is misleading as it suggests that the route is related to retrieving user data, but the
 function being called is `getBanners` which suggests that it is related to retrieving banner data. */
-router.get("/get-user", isAuth,  adminController.getUser);
+router.get("/get-user", isAuth, adminController.getUser);
 
 /* `router.post('/add-user',adminController.postBanner)` is creating a route for the HTTP POST request
 method on the path '/add-user' of the application. When a POST request is made to this route, the
@@ -158,14 +159,14 @@ router.post("/add-category", isAuth,  adminController.postCategory);
 request method on the path '/get-categories' of the application. When a GET request is made to this
 route, the `getCategories` function from the `adminController` module will be executed. This route
 is typically used to retrieve all categories from the application. */
-router.get("/get-categories", isAuth,  adminController.getCategories);
+router.get("/get-categories", isAuth, adminController.getCategories);
 
 /* `router.get('/get-category/:categoryId',adminController.getCategory)` is creating a route for the
 HTTP GET request method on the path '/get-category/:categoryId' of the application. When a GET
 request is made to this route with a specific `categoryId` parameter, the `getCategory` function
 from the `adminController` module will be executed. This route is typically used to retrieve a
 specific category from the application based on its `categoryId`. */
-router.get("/get-category/:categoryId", isAuth,  adminController.getCategory);
+router.get("/get-category/:categoryId", isAuth, adminController.getCategory);
 
 /* `router.put('/edit-category/:categoryId',adminController.editCategory)` is creating a route for the
 HTTP PUT request method on the path '/edit-category/:categoryId' of the application. When a PUT
