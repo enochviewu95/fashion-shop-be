@@ -277,6 +277,8 @@ exports.editBanner = (req, res) => {
     });
 };
 
+
+
 /* This code exports a function named `deleteBanner` that handles a DELETE request to delete a banner
 from the database. It extracts the `bannerId` from the request parameters, calls the `deleteBanner`
 method of the `Banner` model to delete the banner from the database. If the operation is successful,
