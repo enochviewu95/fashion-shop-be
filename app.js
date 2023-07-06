@@ -18,8 +18,10 @@ const passport = require("passport");
 const mongoUri = process.env.MONGODB_URI;
 
 const app = express();
+const origins = process.env.FASHION_ORIGIN_NAME_VALUE;
+const domain = process.env.FASHION_DOMAIN_NAME_VALUE
 
-const allowedOrigins = [process.env.FASHION_ORIGIN_NAME_VALUE, process.env.FASHION_DOMAIN_NAME_VALUE]
+const allowedOrigins = [origins, domain]
 
 
 const corsOptions = {
