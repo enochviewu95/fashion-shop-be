@@ -17,6 +17,7 @@ const authRouter = require("./routes/auth");
 const passport = require("passport");
 const mongoUri = process.env.MONGODB_URI;
 
+const app = express();
 
 const allowedOrigins = [process.env.ORIGIN, process.env.DOMAIN]
 
@@ -31,7 +32,6 @@ const corsOptions = {
   credentials: true
 }
 
-const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
