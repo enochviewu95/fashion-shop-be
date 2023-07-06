@@ -21,6 +21,7 @@ const app = express();
 
 const allowedOrigins = [process.env.ORIGIN, process.env.DOMAIN]
 
+
 const corsOptions = {
   origin: function(origin, callback){
     if(allowedOrigins.indexOf(origin) !== -1 || !origin){
