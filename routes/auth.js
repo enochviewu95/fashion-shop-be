@@ -5,9 +5,9 @@ const router = express.Router();
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", (failedRedirect = "/fashion-shop-fe/login")),
+  passport.authenticate("google", (failedRedirect = "/login")),
   function (req, res) {
-    res.redirect("http://localhost:3000/fashion-shop-fe");
+    res.redirect(process.env.FASHION_DOMAIN_NAME_VALUE);
   }
 );
 router.get(
