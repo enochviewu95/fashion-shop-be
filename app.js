@@ -21,17 +21,17 @@ const app = express();
 const origins = process.env.FASHION_ORIGIN_NAME_VALUE;
 const domain = process.env.FASHION_DOMAIN_NAME_VALUE
 
-const allowedOrigins = [origins, domain]
-
+// const allowedOrigins = [origins, domain]
+// function(origin, callback){
+//   if(allowedOrigins.indexOf(origin) !== -1 || !origin){
+//     callback(null, true)
+//   } else{
+//     callback(new Error('Not allowed by CORS'))
+//   }
+// },
 
 const corsOptions = {
-  origin: function(origin, callback){
-    if(allowedOrigins.indexOf(origin) !== -1 || !origin){
-      callback(null, true)
-    } else{
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
+  origin: domain,
   credentials: true
 }
 
