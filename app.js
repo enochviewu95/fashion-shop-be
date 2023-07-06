@@ -19,7 +19,7 @@ const mongoUri = process.env.MONGODB_URI;
 
 const app = express();
 
-const allowedOrigins = [process.env.ORIGIN, process.env.DOMAIN]
+const allowedOrigins = [process.env.ORIGIN_NAME_VALUE, process.env.DOMAIN_NAME_VALUE]
 
 
 const corsOptions = {
