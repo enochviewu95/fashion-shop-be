@@ -107,10 +107,10 @@ passport.deserializeUser(function (user, done) {
   });
 });
 
+app.use("/",indexRouter)
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
-app.use("/",indexRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
