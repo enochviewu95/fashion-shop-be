@@ -10,6 +10,7 @@ const cors = require("cors");
 const multer = require("multer");
 const User = require("./models/user");
 
+const indexRouter = require("./routes/index")
 const shopRouter = require("./routes/shop");
 const adminRouter = require("./routes/admin");
 const authRouter = require("./routes/auth");
@@ -106,10 +107,10 @@ passport.deserializeUser(function (user, done) {
   });
 });
 
-
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
+app.use("/",indexRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
