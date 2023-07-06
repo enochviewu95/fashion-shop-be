@@ -19,7 +19,7 @@ const mongoUri = process.env.MONGODB_URI;
 
 const app = express();
 
-const allowedOrigins = ["https://giantincorporated.com", "https://www.giantincorporated.com"]
+const allowedOrigins = [process.env.ORIGIN, process.env.DOMAIN]
 
 const corsOptions = {
   origin: function(origin, callback){
