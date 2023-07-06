@@ -25,7 +25,7 @@ app.set("view engine", "jade");
 
 app.use(
   cors({
-    origin: [process.env.ORIGIN,process.env.DOMAIN],
+    origin: process.env.ORIGIN,
     credentials: true,
   })
 );
