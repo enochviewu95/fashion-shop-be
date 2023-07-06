@@ -125,6 +125,13 @@ app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://giantincorporated.com');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  next();
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
