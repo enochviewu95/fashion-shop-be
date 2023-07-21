@@ -10,6 +10,7 @@ const cors = require("cors");
 const multer = require("multer");
 const User = require("./models/user");
 
+const indexRouter = require("./routes/index")
 const shopRouter = require("./routes/shop");
 const adminRouter = require("./routes/admin");
 const authRouter = require("./routes/auth");
@@ -17,17 +18,20 @@ const passport = require("passport");
 const mongoUri = process.env.MONGODB_URI;
 
 const app = express();
+const domain = process.env.FASHION_DOMAIN_NAME_VALUE
+
+const corsOptions = {
+  origin: domain,
+  credentials: true
+}
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-app.use(
-  cors({
-    origin: process.env.ORIGIN,
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -53,7 +57,8 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/png" ||
     file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
+    file.mimetype === "image/jpeg"||
+    file.mimetype === "image/webp"
   ) {
     cb(null, true);
   } else {
@@ -106,7 +111,7 @@ passport.deserializeUser(function (user, done) {
   });
 });
 
-
+app.use("/",indexRouter)
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);

@@ -114,7 +114,7 @@ exports.postReset = (req, res, next) => {
           subject: "Password reset!",
           html: `
         <p>You requested a password reset</p>
-        <p>Click this <a href="http://localhost:3000/fashion-shop-fe/auth/reset/?user=${user._id}&token=${token}">link</a> to set a new password.</p>
+        <p>Click this <a href="${process.env.FASHION_DOMAIN_NAME_VALUE}/auth/reset/?user=${user._id}&token=${token}">link</a> to set a new password.</p>
         `,
         };
         transporter.sendMail(mailOptions);
