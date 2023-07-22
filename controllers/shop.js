@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const Banner = require("../models/banner");
 const Category = require("../models/categories");
 const Collection = require("../models/collection");
-const User = require("../models/user")
+const User = require("../models/user");
 
 const SUCCESSMSG = "success";
 const FAILEDMSG = "failed";
@@ -13,11 +13,11 @@ exports.getShopItems = (req, res, next) => {
     product: [],
     category: [],
     collection: [],
-    statistics:{
-      products:0,
-      catalogs:0,
-      users:0
-    }
+    statistics: {
+      products: 0,
+      catalogs: 0,
+      users: 0,
+    },
   };
   Banner.findOne({ isSelected: true })
     .then((banner) => {
@@ -46,16 +46,28 @@ exports.getShopItems = (req, res, next) => {
       shop.collection = collection;
       shop.statistics.catalogs = collection.length;
       return collection;
-   
     })
-    .then(()=>{
+    .then(() => {
       return User.find();
     })
-    .then(users=>{
+    .then((users) => {
       shop.statistics.users = users.length;
       res.status(200).json(shop);
     })
     .catch((err) => {
       res.json({ response: FAILEDMSG, msg: err });
     });
+};
+
+exports.getProduct = (req, res, next) => {
+  const productId = req.params.id;
+  Product.findOne({ _id: productId })
+    .then((product) => {
+      if (!product) {
+        console.log("No product found");
+        return;
+      }
+      res.status(200).json(product);
+    })
+    .catch((err) => res.json({ response: FAILEDMSG, msg: err }));
 };
