@@ -49,11 +49,11 @@ exports.postSignup = (req, res, next) => {
           res.json({ response: SUCCESSMSG });
         })
         .catch((err) => {
-          res.json({ response: FAILEDMSG, msg: err });
+          next(err);
         });
     })
     .catch((err) => {
-      res.json({ response: FAILEDMSG, msg: err });
+      next(err);
     });
 };
 
@@ -68,7 +68,7 @@ exports.getUser = (req, res, next) => {
   if (req.user) {
     res.status(200).json({
       status: SUCCESSMSG,
-      msg:"Login successful",
+      msg: "Login successful",
       user: {
         email: req.user.email,
         firstname: req.user.firstname,
@@ -76,8 +76,10 @@ exports.getUser = (req, res, next) => {
         role: req.user.role,
       },
     });
-  }else{
-    res.status(200).json({ status: FAILEDMSG, msg:"Your credentials are incorrect" });
+  } else {
+    res
+      .status(200)
+      .json({ status: FAILEDMSG, msg: "Your credentials are incorrect" });
   }
 };
 
@@ -120,7 +122,7 @@ exports.postReset = (req, res, next) => {
         transporter.sendMail(mailOptions);
       })
       .catch((err) => {
-        return res.json({ response: FAILEDMSG, msg: err });
+        next(err);
       });
   });
 };
@@ -150,6 +152,6 @@ exports.postPassword = (req, res, next) => {
       res.json({ response: SUCCESSMSG, msg: "Password reset successful" });
     })
     .catch((err) => {
-      return res.json({ response: FAILEDMSG, msg: err });
+      next(err);
     });
 };

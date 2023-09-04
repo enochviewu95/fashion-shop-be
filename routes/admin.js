@@ -80,7 +80,7 @@ router.delete(
 method on the path '/get-banners' of the application. When a GET request is made to this route, the
 `getBanners` function from the `adminController` module will be executed. This route is typically
 used to retrieve all banners from the application. */
-router.get("/get-banners", isAuth,adminController.getBanners);
+router.get("/get-banners",adminController.getBanners);
 
 /* `router.post('/add-banner',adminController.postBanner)` is creating a route for the HTTP POST
 request method on the path '/add-banner' of the application. When a POST request is made to this

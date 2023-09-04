@@ -10,21 +10,22 @@ const cors = require("cors");
 const multer = require("multer");
 const User = require("./models/user");
 
-const indexRouter = require("./routes/index")
+const indexRouter = require("./routes/index");
 const shopRouter = require("./routes/shop");
 const adminRouter = require("./routes/admin");
 const authRouter = require("./routes/auth");
 const passport = require("passport");
+
 const mongoUri = process.env.MONGODB_URI;
 
 const app = express();
-const domain = process.env.FASHION_DOMAIN_NAME_VALUE
+const domain = process.env.FASHION_DOMAIN_NAME_VALUE;
+const FAILEDMSG = "failed";
 
 const corsOptions = {
   origin: domain,
-  credentials: true
-}
-
+  credentials: true,
+};
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -57,7 +58,7 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/png" ||
     file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"||
+    file.mimetype === "image/jpeg" ||
     file.mimetype === "image/webp"
   ) {
     cb(null, true);
@@ -102,7 +103,7 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (user, done) {
   process.nextTick(function () {
     User.findOne({ _id: user.id })
-    .then((user) => {
+      .then((user) => {
         done(null, user);
       })
       .catch((err) => {
@@ -111,7 +112,7 @@ passport.deserializeUser(function (user, done) {
   });
 });
 
-app.use("/",indexRouter)
+app.use("/", indexRouter);
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
@@ -128,8 +129,7 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  res.status(err.status || 500).json({ response: FAILEDMSG, msg: err.message });
 });
 
 module.exports = app;
