@@ -7,12 +7,12 @@ router.get(
   "/google/callback",
   passport.authenticate("google", (failedRedirect = "/login")),
   function (req, res) {
-    res.redirect(process.env.FASHION_DOMAIN_NAME_VALUE);
+    res.redirect(process.env.FASHION_DOMAIN_NAME_VALUE); 
   }
 );
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
 router.post(

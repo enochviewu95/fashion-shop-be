@@ -4,7 +4,7 @@ const shopController = require("../controllers/shop");
 const cache = require('../middlewares/cache-config')
 
 
-router.get("/get-shop", cache,  shopController.getShopItems)
+router.get("/get-shop",shopController.getShopItems)
 router.get('/get-product/:id',shopController.getProduct)
 
 module.exports = router;
