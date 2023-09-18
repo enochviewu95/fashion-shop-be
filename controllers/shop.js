@@ -18,7 +18,7 @@ exports.getShopItems = async (req, res, next) => {
       },
     };
     shop.banner = await Banner.findOne({ isSelected: true });
-    shop.product = await Product.find();
+    shop.product = await Product.find().populate('category').exec();
     shop.category = await Category.find();
     shop.collection = await Collection.find();
     let users = await User.find();

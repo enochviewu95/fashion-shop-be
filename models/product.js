@@ -7,9 +7,9 @@ const ProductsSchema = new Schema(
         title: String,
         description: String,
         imageUrl: String,
-        price: mongoose.Types.Decimal128,
+        price: Schema.Types.Decimal128,
         details: String,
-        category: mongoose.Types.ObjectId
+        category: {type: Schema.Types.ObjectId, ref: 'Category'}
     },
     {
         methods: {
