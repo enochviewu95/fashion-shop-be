@@ -4,7 +4,7 @@ require("dotenv").config();
 const mongooseConnect = async () => {
   try {
     const connection = await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected')
+    console.log("Connected");
     return connection;
   } catch (error) {
     handleConnectionError(error);
@@ -12,10 +12,10 @@ const mongooseConnect = async () => {
 };
 
 const handleConnectionError = (err) => {
-  setTimeout(() => {
+  setTimeout(async () => {
     console.log("Connection failed.", err);
     console.log("Reconnection ...");
-    mongooseConnect();
+    await mongooseConnect();
   }, 2000);
 };
 

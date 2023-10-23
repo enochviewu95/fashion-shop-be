@@ -4,8 +4,7 @@ const User = require("../models/user");
 const Banner = require("../models/banner");
 const Category = require("../models/categories");
 const SUCCESSMSG = "success";
-const mongoose = require('mongoose')
-
+const mongoose = require("mongoose");
 
 /*<=========================PRODUCT CONTROLLERS====================>*/
 
@@ -40,19 +39,41 @@ body, creates a new `Product` object with these values, and calls the `createPro
 `Product` model to save the new product to the database. If the operation is successful, it logs the
 result to the console. If there is an error, it logs the error to the console. */
 exports.postProducts = async (req, res, next) => {
+  if (!req.body) {
+    return res.json({ response: FAILEDMSG, msg: "Fields cannot be empty" });
+  }
+
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
   const imageUrl = image.path;
   const price = req.body.price;
   const category = new mongoose.Types.ObjectId(req.body.category);
-  const details = req.body.details
+  const details = req.body.details;
 
-  const product = new Product({ title, description, imageUrl, price, category, details });
+  if (
+    title == null ||
+    description == null ||
+    image == null ||
+    price == null ||
+    category == null ||
+    details == null
+  ) {
+    return res.json({ response: FAILEDMSG, msg: "The fields cannot be empty" });
+  }
+
+  const product = new Product({
+    title,
+    description,
+    imageUrl,
+    price,
+    category,
+    details,
+  });
   product
     .createProduct()
     .then(() => {
-      res.json({ response: SUCCESSMSG });
+      res.status(200).json({ response: SUCCESSMSG });
     })
     .catch((err) => {
       next(err);
@@ -72,7 +93,7 @@ exports.editProduct = (req, res, next) => {
   const imageUrl = image !== undefined ? image.path : "";
   const price = req.body.price;
   const category = new mongoose.Types.ObjectId(req.body.category);
-  const details = req.body.details
+  const details = req.body.details;
 
   Product.findById({ _id: prodId })
     .then((product) => {

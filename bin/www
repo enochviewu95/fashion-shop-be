@@ -6,8 +6,8 @@
 
 var app = require("../app");
 var debug = require("debug")("fashion-shop-be:server");
+var {mongooseConnect} = require('../util/database');
 var http = require("http");
-var { mongooseConnect } = require("../util/database");
 
 /**
  * Get port from environment and store in Express.
@@ -15,7 +15,6 @@ var { mongooseConnect } = require("../util/database");
 
 var port = normalizePort(process.env.PORT || "8080");
 app.set("port", port);
-
 
 /**
  * Create HTTP server.
@@ -26,10 +25,10 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-mongooseConnect();
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
+server.on("close", onClose);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -81,8 +80,13 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 
-function onListening() {
+async function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
+  await mongooseConnect();
+}
+
+function onClose() {
+  mongoose.connection.close();
 }

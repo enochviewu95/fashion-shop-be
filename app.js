@@ -112,7 +112,7 @@ passport.deserializeUser(function (user, done) {
   });
 });
 
-app.use("/", indexRouter);
+app.use("/index", indexRouter);
 app.use("/auth", authRouter);
 app.use("/shop/api", shopRouter);
 app.use("/admin/api", adminRouter);
