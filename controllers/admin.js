@@ -12,14 +12,13 @@ const mongoose = require("mongoose");
 from the database. It calls the `getProducts` method of the `Product` model to retrieve the
 products, and then sends the result as a JSON response using the `res.json` method. If there is an
 error, it logs the error to the console. */
-exports.getProducts = (req, res, next) => {
-  Product.getProducts()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getProducts = async (req, res, next) => {
+  try {
+    const result = await Product.getProducts();
+    res.status(200).json({msg: SUCCESSMSG, response: result})
+  } catch (err) {
+         next(err);
+  }
 };
 
 exports.getProduct = (req, res, next) => {
@@ -39,10 +38,6 @@ body, creates a new `Product` object with these values, and calls the `createPro
 `Product` model to save the new product to the database. If the operation is successful, it logs the
 result to the console. If there is an error, it logs the error to the console. */
 exports.postProducts = async (req, res, next) => {
-  if (!req.body) {
-    return res.json({ response: FAILEDMSG, msg: "Fields cannot be empty" });
-  }
-
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
@@ -51,33 +46,20 @@ exports.postProducts = async (req, res, next) => {
   const category = new mongoose.Types.ObjectId(req.body.category);
   const details = req.body.details;
 
-  if (
-    title == null ||
-    description == null ||
-    image == null ||
-    price == null ||
-    category == null ||
-    details == null
-  ) {
-    return res.json({ response: FAILEDMSG, msg: "The fields cannot be empty" });
-  }
-
-  const product = new Product({
-    title,
-    description,
-    imageUrl,
-    price,
-    category,
-    details,
-  });
-  product
-    .createProduct()
-    .then(() => {
-      res.status(200).json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+  try {
+    const product = new Product({
+      title,
+      description,
+      imageUrl,
+      price,
+      category,
+      details,
     });
+    const data = await product.createProduct();
+    res.status(200).json({ response: data, msg: SUCCESSMSG });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* `exports.editProduct` is a function that handles a PUT request to update an existing product in the

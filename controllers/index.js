@@ -5,3 +5,7 @@ exports.getIndex = (req, res, next) => {
 exports.getTest = (req, res, next) => {
   res.json({ testing: "Successful" });
 };
+
+exports.postTest = (req, res, next) => {
+  res.json({ testing: req.body.testing });
+};

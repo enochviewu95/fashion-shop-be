@@ -90,3 +90,5 @@ async function onListening() {
 function onClose() {
   mongoose.connection.close();
 }
+
+module.exports = server;

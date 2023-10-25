@@ -45,8 +45,8 @@ exports.postSignup = (req, res, next) => {
 
           return user.save();
         })
-        .then(() => {
-          res.json({ response: SUCCESSMSG });
+        .then((user) => {
+          res.json({ msg: SUCCESSMSG, response: user });
         })
         .catch((err) => {
           next(err);
@@ -67,9 +67,8 @@ exports.postLogout = (req, res, next) => {
 exports.getUser = (req, res, next) => {
   if (req.user) {
     res.status(200).json({
-      status: SUCCESSMSG,
-      msg: "Login successful",
-      user: {
+      msg: SUCCESSMSG,
+      response: {
         email: req.user.email,
         firstname: req.user.firstname,
         lastname: req.user.lastname,

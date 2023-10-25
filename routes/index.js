@@ -3,6 +3,6 @@ const router = express.Router();
 const indexController = require('../controllers/index')
 
 router.get("/", indexController.getIndex);
-router.get("/get-test", indexController.getTest);
+router.post("/post-test", indexController.postTest);
 
 module.exports = router;

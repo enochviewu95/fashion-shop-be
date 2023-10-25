@@ -18,9 +18,7 @@ router.get(
 router.post(
   "/signin",
   passport.authenticate("local", { failureRedirect: "/auth/login" }),
-  (req, res) => {
-    res.redirect("/auth/login");
-  }
+  authController.getUser
 );
 router.get("/login", authController.getUser);
 router.post("/signup", authController.postSignup);

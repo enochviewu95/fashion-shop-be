@@ -3,12 +3,16 @@ const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
+// const session = require("express-session");
+// const MongoDBStore = require("connect-mongodb-session")(session);
+const Session = require('./util/session-setup');
 const logger = require("morgan");
 const cors = require("cors");
-const multer = require("multer");
+// const multer = require("multer");
 const User = require("./models/user");
+const Multer = require("./util/multer_setup");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
 
 const indexRouter = require("./routes/index");
 const shopRouter = require("./routes/shop");
@@ -22,67 +26,23 @@ const app = express();
 const domain = process.env.FASHION_DOMAIN_NAME_VALUE;
 const FAILEDMSG = "failed";
 
-const corsOptions = {
-  origin: domain,
-  credentials: true,
-};
-
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: domain,
+  credentials: true,
+}));
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const store = new MongoDBStore({
-  uri: mongoUri,
-  collection: "sessions",
-});
 
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "images");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
-    );
-  },
-});
+app.use(Session.userSession);
 
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/webp"
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-
-app.use(
-  session({
-    secret: "avitorLiter@cy",
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-  })
-);
-
-app.use(
-  multer({
-    dest: "images",
-    storage: fileStorage,
-    fileFilter: fileFilter,
-  }).single("image")
-);
+app.use(Multer.fileupload);
 
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.static(path.join(__dirname, "public")));
@@ -91,26 +51,21 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(passport.initialize());
 app.use(passport.session());
 
-require("./middlewares/local-passport-config")(passport);
-require("./middlewares/google-passport-config")(passport);
+passport.use(
+  new LocalStrategy(
+    User.localAuthenticate().options,
+    User.localAuthenticate().verify
+  )
+);
+passport.use(
+  new GoogleStrategy(
+    User.googleAuthenticate().options,
+    User.googleAuthenticate().verify
+  )
+);
 
-passport.serializeUser(function (user, done) {
-  process.nextTick(function () {
-    done(null, { id: user._id });
-  });
-});
-
-passport.deserializeUser(function (user, done) {
-  process.nextTick(function () {
-    User.findOne({ _id: user.id })
-      .then((user) => {
-        done(null, user);
-      })
-      .catch((err) => {
-        done(err);
-      });
-  });
-});
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use("/index", indexRouter);
 app.use("/auth", authRouter);
