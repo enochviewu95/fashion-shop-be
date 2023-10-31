@@ -65,7 +65,7 @@ passport.use(
 );
 
 passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.deserializeUser(User.deserializeUser(User));
 
 app.use("/index", indexRouter);
 app.use("/auth", authRouter);

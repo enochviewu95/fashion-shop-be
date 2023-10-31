@@ -8,21 +8,19 @@ const {
   createProductValidators,
   validator,
 } = require("../validators/validators");
-const create_product = require("../schemas/create_product.schema");
+const create_product = require("../schemas/product_schema/create_product.schema");
 
 /*<=========================PRODUCT ROUTERS====================>*/
 
 /* `router.get('/', adminController.getProducts);` is creating a route for the HTTP GET request method
 on the root path ('/') of the application. When a GET request is made to this route, the
 `getProducts` function from the `adminController` module will be executed. */
-// router.get("/get-products", adminController.getProducts);
 router.get("/get-products", isAuth, adminController.getProducts);
 
 /* `router.post('/add-product',adminController.postProducts)` is creating a route for the HTTP POST
 request method on the path '/add-product' of the application. When a POST request is made to this
 route, the `postProducts` function from the `adminController` module will be executed. This route is
 typically used to add a new product to the application. */
-// router.post("/add-product", isAuth, adminController.postProducts);
 router.post(
   "/add-product",
   isAuth,

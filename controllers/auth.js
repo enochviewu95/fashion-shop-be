@@ -21,8 +21,8 @@ exports.postSignup = (req, res, next) => {
   const password = req.body.password;
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
-  const provider = "local";
-  const role = "client";
+  const provider = req.body.provider;
+  const role = req.body.role;
   User.getUser(email)
     .then((userDoc) => {
       if (userDoc) {

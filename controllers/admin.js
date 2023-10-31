@@ -15,9 +15,9 @@ error, it logs the error to the console. */
 exports.getProducts = async (req, res, next) => {
   try {
     const result = await Product.getProducts();
-    res.status(200).json({msg: SUCCESSMSG, response: result})
+    res.status(200).json({ msg: SUCCESSMSG, response: result });
   } catch (err) {
-         next(err);
+    next(err);
   }
 };
 
