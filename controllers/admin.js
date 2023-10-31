@@ -5,6 +5,7 @@ const Banner = require("../models/banner");
 const Category = require("../models/categories");
 const SUCCESSMSG = "success";
 const mongoose = require("mongoose");
+const fs = require("fs");
 
 /*<=========================PRODUCT CONTROLLERS====================>*/
 
@@ -100,15 +101,37 @@ from the database. It extracts the `productId` from the request parameters, call
 `deleteProduct` method of the `Product` model to delete the product from the database. If the
 operation is successful, it sends a JSON response with a success message using the `res.json`
 method. If there is an error, it logs the error to the console. */
-exports.deleteProduct = (req, res, next) => {
+exports.deleteProduct = async (req, res, next) => {
   const prodId = req.params.productId;
-  Product.deleteProduct(prodId)
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+  try {
+    const product = await Product.findById({ _id: prodId });
+    if (product == null) {
+      const err = new Error("Product does not exist for deletion");
+      err.status = 400;
+      throw err;
+    }
+
+    const { _id, imageUrl } = product;
+
+    fs.unlink(imageUrl, async (err) => {
+      if (err) {
+        throw Error(err);
+      }
+      const deleteResponse = await Product.deleteProduct(_id);
+      if (!deleteResponse.acknowledged && deleteResponse.deletedCount != 1) {
+        const err = new Error(
+          "Unable to delete at this moment try again later"
+        );
+        err.status = 400;
+        throw err;
+      }
+      res
+        .status(200)
+        .json({ msg: SUCCESSMSG, response: "Product deletion successful" });
     });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /*<=========================END OF PRODUCT CONTROLLERS====================>*/

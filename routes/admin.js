@@ -2,12 +2,7 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/admin");
 const isAuth = require("../middlewares/is-auth");
-const { checkSchema } = require("express-validator");
-const {
-  createProduct,
-  createProductValidators,
-  validator,
-} = require("../validators/validators");
+const { validator } = require("../validators/validators");
 const create_product = require("../schemas/product_schema/create_product.schema");
 
 /*<=========================PRODUCT ROUTERS====================>*/

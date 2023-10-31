@@ -2,9 +2,11 @@ const fs = require("fs");
 const request = require("supertest");
 const app = require("../../app");
 const mongoTestDB = require("../connect-db");
+const product = require("../../models/product");
 
 let connection;
 let loginResponse;
+let productCreated;
 
 beforeAll(async () => {
   connection = await mongoTestDB.connect();
@@ -17,34 +19,33 @@ afterAll(async () => {
 
 describe("POST /admin/api/add-product", () => {
   describe("given that user wants to add product", () => {
-
     test("should fail to register user", async () => {
-            const userDetails = {
-              email: "viewuenoch@gmail.com",
-              password: "Litercy1995",
-              firstname: "Enoch",
-              lastname: "Viewu",
-              provider: "local",
-              role: "admin",
-            };
-            try {
-              const { statusCode, body, header } = await request(app)
-                .post("/auth/signup")
-                .field("email", userDetails.email)
-                .field("password", userDetails.password)
-                .field("firstname", userDetails.firstname)
-                .field("lastname", userDetails.lastname)
-                .field("provider", userDetails.provider)
-                .field("role", userDetails.role);
-              expect(statusCode).toBe(400);
-              expect(body).toHaveProperty("response");
-              expect(body).toHaveProperty("msg");
-              expect(header["content-type"]).toMatch(/json/);
-            } catch (err) {
-              console.error("Sign up error", err);
-              throw err;
-            }
-    })
+      const userDetails = {
+        email: "viewuenoch@gmail.com",
+        password: "Litercy1995",
+        firstname: "Enoch",
+        lastname: "Viewu",
+        provider: "local",
+        role: "admin",
+      };
+      try {
+        const { statusCode, body, header } = await request(app)
+          .post("/auth/signup")
+          .field("email", userDetails.email)
+          .field("password", userDetails.password)
+          .field("firstname", userDetails.firstname)
+          .field("lastname", userDetails.lastname)
+          .field("provider", userDetails.provider)
+          .field("role", userDetails.role);
+        expect(statusCode).toBe(400);
+        expect(body).toHaveProperty("response");
+        expect(body).toHaveProperty("msg");
+        expect(header["content-type"]).toMatch(/json/);
+      } catch (err) {
+        console.error("Sign up error", err);
+        throw err;
+      }
+    });
 
     test("should register user", async () => {
       const userDetails = {
@@ -64,13 +65,11 @@ describe("POST /admin/api/add-product", () => {
           .field("lastname", userDetails.lastname)
           .field("provider", userDetails.provider)
           .field("role", userDetails.role);
-        console.log("Sign up response", body);
         expect(statusCode).toBe(200);
         expect(body).toHaveProperty("response");
         expect(body).toHaveProperty("msg");
         expect(header["content-type"]).toMatch(/json/);
       } catch (err) {
-        console.error("Sign up error", err);
         throw err;
       }
     });
@@ -127,17 +126,11 @@ describe("POST /admin/api/add-product", () => {
           .field("category", productPayload.category)
           .field("details", productPayload.details)
           .attach("image", "test/test_assets/shoe_four.webp");
-
         expect(statusCode).toBe(200); //Expect the status code of response to be 200
         expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
         expect(body).toHaveProperty("response"); //Expect the body to have a property called response
         expect(body).toHaveProperty("msg"); //Expect the body to have a property called msg
-
-        fs.unlink(body.response.imageUrl, (err) => {
-          if (err) {
-            throw err;
-          }
-        });
+        productCreated = body.response;
       } catch (err) {
         throw err;
       }
@@ -153,6 +146,40 @@ describe("GET /admin/api/get-products", () => {
           .get("/admin/api/get-products")
           .set("Cookie", loginResponse.headers["set-cookie"]);
         expect(statusCode).toBe(200); //Expect the status code of response to be 200
+        expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
+        expect(body).toHaveProperty("response"); //Expect the body to have a property called response
+        expect(body).toHaveProperty("msg"); //Expect the body to have a property called msg
+      } catch (err) {
+        throw err;
+      }
+    });
+  });
+});
+
+describe("DELETE /admin/api/delete-product/:productId", () => {
+  describe("given that user wants to delete a product", () => {
+    test("should delete product if id is provided", async () => {
+      try {
+        const { body, statusCode, header } = await request(app)
+          .delete(`/admin/api/delete-product/${productCreated._id}`)
+          .set("Cookie", loginResponse.headers["set-cookie"]);
+        console.log("Response", body);
+        expect(statusCode).toBe(200); //Expect the status code of response to be 200
+        expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
+        expect(body).toHaveProperty("response"); //Expect the body to have a property called response
+        expect(body).toHaveProperty("msg"); //Expect the body to have a property called msg
+      } catch (err) {
+        throw err;
+      }
+    });
+    test("should delete product fail", async () => {
+      try {
+        console.log("product created", productCreated);
+        const { body, statusCode, header }  = await request(app)
+          .delete(`/admin/api/delete-product/${productCreated._id}`)
+          .set("Cookie", loginResponse.headers["set-cookie"]);
+        console.log("Response", body);
+        expect(statusCode).toBe(400); //Expect the status code of response to be 200
         expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
         expect(body).toHaveProperty("response"); //Expect the body to have a property called response
         expect(body).toHaveProperty("msg"); //Expect the body to have a property called msg
