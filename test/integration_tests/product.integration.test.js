@@ -1,8 +1,6 @@
-const fs = require("fs");
 const request = require("supertest");
 const app = require("../../app");
 const mongoTestDB = require("../connect-db");
-const product = require("../../models/product");
 
 let connection;
 let loginResponse;
@@ -42,7 +40,6 @@ describe("POST /admin/api/add-product", () => {
         expect(body).toHaveProperty("msg");
         expect(header["content-type"]).toMatch(/json/);
       } catch (err) {
-        console.error("Sign up error", err);
         throw err;
       }
     });
@@ -163,7 +160,6 @@ describe("DELETE /admin/api/delete-product/:productId", () => {
         const { body, statusCode, header } = await request(app)
           .delete(`/admin/api/delete-product/${productCreated._id}`)
           .set("Cookie", loginResponse.headers["set-cookie"]);
-        console.log("Response", body);
         expect(statusCode).toBe(200); //Expect the status code of response to be 200
         expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
         expect(body).toHaveProperty("response"); //Expect the body to have a property called response
@@ -174,11 +170,9 @@ describe("DELETE /admin/api/delete-product/:productId", () => {
     });
     test("should delete product fail", async () => {
       try {
-        console.log("product created", productCreated);
         const { body, statusCode, header }  = await request(app)
           .delete(`/admin/api/delete-product/${productCreated._id}`)
           .set("Cookie", loginResponse.headers["set-cookie"]);
-        console.log("Response", body);
         expect(statusCode).toBe(400); //Expect the status code of response to be 200
         expect(header["content-type"]).toMatch(/json/); //Expect the content type of the response to be json
         expect(body).toHaveProperty("response"); //Expect the body to have a property called response

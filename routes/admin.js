@@ -4,6 +4,8 @@ const adminController = require("../controllers/admin");
 const isAuth = require("../middlewares/is-auth");
 const { validator } = require("../validators/validators");
 const create_product = require("../schemas/product_schema/create_product.schema");
+const add_banner = require("../schemas/banner_schema/add_banner.schema");
+const update_banner = require("../schemas/banner_schema/update_banner.schema");
 
 /*<=========================PRODUCT ROUTERS====================>*/
 
@@ -107,7 +109,13 @@ router.get("/get-banners", adminController.getBanners);
 request method on the path '/add-banner' of the application. When a POST request is made to this
 route, the `postBanner` function from the `adminController` module will be executed. This route is
 typically used to add a new banner to the application. */
-router.post("/add-banner", isAuth, adminController.postBanner);
+router.post(
+  "/add-banner",
+  isAuth,
+  add_banner,
+  validator,
+  adminController.postBanner
+);
 
 /* `router.get("/get-banner/:bannerId", adminController.getBanner);` is creating a route for the HTTP
 GET request method on the path '/get-banner/:bannerId' of the application. When a GET request is
@@ -132,7 +140,13 @@ PUT request method on the path '/edit-banner/:bannerId' of the application. When
 made to this route with a specific `bannerId` parameter, the `editBanner` function from the
 `adminController` module will be executed. This route is typically used to update an existing banner
 in the application. */
-router.put("/edit-banner/:bannerId", isAuth, adminController.editBanner);
+router.put(
+  "/edit-banner/:bannerId",
+  isAuth,
+  update_banner,
+  validator,
+  adminController.editBanner
+);
 
 /* `router.delete('/delete-banner/:bannerId',adminController.deleteCollection)` is creating a route for
 the HTTP DELETE request method on the path '/delete-banner/:bannerId' of the application. When a
@@ -210,5 +224,7 @@ router.delete(
   isAuth,
   adminController.deleteCategory
 );
+
+router.get("/get-dashboard", isAuth, adminController.getDashboardData);
 
 module.exports = router;

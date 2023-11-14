@@ -15,22 +15,21 @@ products, and then sends the result as a JSON response using the `res.json` meth
 error, it logs the error to the console. */
 exports.getProducts = async (req, res, next) => {
   try {
-    const result = await Product.getProducts();
+    const result = await Product.find();
     res.status(200).json({ msg: SUCCESSMSG, response: result });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getProduct = (req, res, next) => {
+exports.getProduct = async (req, res, next) => {
   const prodId = req.params.productId;
-  Product.getProduct(prodId)
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+  try {
+    const product = await Product.findById({ _id: prodId });
+    res.status(200).json({ msg: SUCCESSMSG, response: product });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* This code exports a function named `postProducts` that handles a POST request to create a new
@@ -45,6 +44,7 @@ exports.postProducts = async (req, res, next) => {
   const imageUrl = image.path;
   const price = req.body.price;
   const category = new mongoose.Types.ObjectId(req.body.category);
+  const user = req.user._id;
   const details = req.body.details;
 
   try {
@@ -55,8 +55,9 @@ exports.postProducts = async (req, res, next) => {
       price,
       category,
       details,
+      user,
     });
-    const data = await product.createProduct();
+    const data = await product.save(this);
     res.status(200).json({ response: data, msg: SUCCESSMSG });
   } catch (err) {
     next(err);
@@ -68,32 +69,36 @@ database. It extracts the updated product information from the request body and 
 the request parameters. It then calls the `updateProduct` method of the `Product` model to update
 the product in the database. If the operation is successful, it sends a JSON response with a success
 message using the `res.json` method. If there is an error, it logs the error to the console. */
-exports.editProduct = (req, res, next) => {
-  const prodId = req.params.productId;
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const imageUrl = image !== undefined ? image.path : "";
-  const price = req.body.price;
-  const category = new mongoose.Types.ObjectId(req.body.category);
-  const details = req.body.details;
+exports.editProduct = async (req, res, next) => {
+  try {
+    const prodId = req.params.productId;
+    const title = req.body.title;
+    const description = req.body.description;
+    const image = req.file;
+    const imageUrl = image !== undefined ? image.path : "";
+    const price = req.body.price;
+    const category = new mongoose.Types.ObjectId(req.body.category);
+    const details = req.body.details;
 
-  Product.findById({ _id: prodId })
-    .then((product) => {
-      product.title = title;
-      product.description = description;
-      product.price = price;
-      product.category = category;
-      product.details = details;
-      product.imageUrl = imageUrl !== "" ? imageUrl : product.imageUrl;
-      return product.save();
-    })
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+    const product = await Product.findById({ _id: prodId });
+    if (product == null) {
+      const error = Error("Product does not exist");
+      error.status = 400;
+      throw error;
+    }
+
+    product.title = title;
+    product.description = description;
+    product.price = price;
+    product.category = category;
+    product.details = details;
+    product.imageUrl = imageUrl !== "" ? imageUrl : product.imageUrl;
+
+    const updatedProduct = await product.save();
+    res.status(200).json({ msg: SUCCESSMSG, response: updatedProduct });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* This code exports a function named `deleteProduct` that handles a DELETE request to delete a product
@@ -117,8 +122,8 @@ exports.deleteProduct = async (req, res, next) => {
       if (err) {
         throw Error(err);
       }
-      const deleteResponse = await Product.deleteProduct(_id);
-      if (!deleteResponse.acknowledged && deleteResponse.deletedCount != 1) {
+      const deleteResponse = await Product.deleteOne({ _id: _id });
+      if (deleteResponse.deletedCount != 1) {
         const err = new Error(
           "Unable to delete at this moment try again later"
         );
@@ -127,7 +132,7 @@ exports.deleteProduct = async (req, res, next) => {
       }
       res
         .status(200)
-        .json({ msg: SUCCESSMSG, response: "Product deletion successful" });
+        .json({ msg: SUCCESSMSG, response: "Product deleted successfully" });
     });
   } catch (err) {
     next(err);
@@ -239,41 +244,48 @@ new `Banner` object with these values, and calls the `createBanner` method of th
 save the new banner to the database. If the operation is successful, it sends a JSON response with a
 success message using the `res.json` method. If there is an error, it sends a JSON response with an
 error message using the `res.json` method. */
-exports.postBanner = (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const isSelected = false;
+exports.postBanner = async (req, res, next) => {
+  try {
+    const title = req.body.title;
+    const description = req.body.description;
+    const image = req.file;
+    const isSelected = false;
+    const user = req.user._id;
 
-  if (!image) {
-    res.json({ response: FAILEDMSG, msg: "Invalid image" });
-  }
+    if (!image) {
+      const error = new Error("Invalid image");
+      error.status = 400;
+      throw error;
+    }
 
-  const imageUrl = image.path;
-  const banner = new Banner({ title, description, imageUrl, isSelected });
+    const imageUrl = image.path;
 
-  banner
-    .createBanner()
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+    const banner = new Banner({
+      title,
+      description,
+      imageUrl,
+      isSelected,
+      user,
     });
+
+    const data = await banner.save(this);
+    res.json({ msg: SUCCESSMSG, response: data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* `exports.getBanners` is a function that handles a GET request to retrieve all banners from the
 database. It calls the `getBanners` method of the `Banner` model to retrieve the banners, and then
 sends the result as a JSON response using the `res.json` method. If there is an error, it sends a
 JSON response with an error message using the `res.json` method. */
-exports.getBanners = (req, res, next) => {
-  Banner.getBanners()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getBanners = async (req, res, next) => {
+  try {
+    const data = await Banner.find();
+    res.status(200).json({ msg: SUCCESSMSG, response: data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* `exports.editBanner` is a function that handles a PUT request to update an existing banner in the
@@ -282,7 +294,7 @@ the request parameters. It then calls the `updateBanner` method of the `Banner` 
 banner in the database. If the operation is successful, it sends a JSON response with a success
 message using the `res.json` method. If there is an error, it sends a JSON response with an error
 message using the `res.json` method. */
-exports.editBanner = (req, res, next) => {
+exports.editBanner = async (req, res, next) => {
   const bannerId = req.params.bannerId;
   const title = req.body.title;
   const description = req.body.description;
@@ -290,20 +302,23 @@ exports.editBanner = (req, res, next) => {
   const isSelected = req.body.selected;
   const imageUrl = image !== undefined ? image.path : "";
 
-  Banner.findById({ _id: bannerId })
-    .then((banner) => {
-      banner.title = title;
-      banner.description = description;
-      banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
-      banner.isSelected = isSelected;
-      return banner.save();
-    })
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+  try {
+    const banner = await Banner.findById({ _id: bannerId });
+
+    if (banner == null) {
+      const err = Error("Banner not found");
+      err.status = 400;
+      throw err;
+    }
+    banner.title = title;
+    banner.description = description;
+    banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
+    banner.isSelected = isSelected;
+    const data = await banner.save();
+    res.json({ msg: SUCCESSMSG, response: data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* This code exports a function named `deleteBanner` that handles a DELETE request to delete a banner
@@ -311,41 +326,73 @@ from the database. It extracts the `bannerId` from the request parameters, calls
 method of the `Banner` model to delete the banner from the database. If the operation is successful,
 it sends a JSON response with a success message using the `res.json` method. If there is an error,
 it sends a JSON response with an error message using the `res.json` method. */
-exports.deleteBanner = (req, res, next) => {
-  const bannerId = req.params.bannerId;
-  Banner.deleteBanner(bannerId)
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+exports.deleteBanner = async (req, res, next) => {
+  try {
+    const bannerId = req.params.bannerId;
+    const banner = await Banner.findById({ _id: bannerId });
+    if (banner == null) {
+      const error = Error(banner);
+      error.status = 400;
+      throw error;
+    }
+
+    const { id, imageUrl } = banner;
+
+    fs.unlink(imageUrl, async (err) => {
+      if (err) {
+        const error = Error(err);
+        error.status = 400;
+        throw error;
+      }
+      const deleteResponse = await Banner.deleteOne({ _id: id });
+      if (!deleteResponse.acknowledged && deleteResponse.deletedCount != 1) {
+        const err = new Error(
+          "Unable to delete at this moment try again later"
+        );
+        err.status = 400;
+        throw err;
+      }
+      res
+        .status(200)
+        .json({ msg: SUCCESSMSG, response: "Banner deleted successfully" });
     });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.getBanner = (req, res, next) => {
-  const bannerId = req.params.bannerId;
-  Banner.getBanner(bannerId)
-    .then((result) => {
-      res.json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getBanner = async (req, res, next) => {
+  try {
+    const bannerId = req.params.bannerId;
+    const result = await Banner.findById({ _id: bannerId });
+    res.status(200).json({ msg: SUCCESSMSG, response: result });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.updateSelectedBanner = (req, res, next) => {
+exports.updateSelectedBanner = async (req, res, next) => {
   const bannerId = req.params.bannerId;
-  Banner.updateOne({ isSelected: true }, { $set: { isSelected: false } })
-    .then(() => {
-      Banner.updateOne({ _id: bannerId }, { $set: { isSelected: true } }).then(
-        () => {
-          res.json({ response: SUCCESSMSG });
-        }
-      );
-    })
-    .catch((err) => {
-      next(err);
-    });
+  try {
+    const result = await Banner.updateOne(
+      { isSelected: true },
+      { $set: { isSelected: false } }
+    );
+    const updateResponse = await Banner.updateOne(
+      { _id: bannerId },
+      { $set: { isSelected: true } }
+    );
+
+    if (updateResponse.modifiedCount != 1) {
+      const err = Error(`Failed to update banner`);
+      err.status = 400;
+      throw err;
+    }
+
+    res.status(200).json({ msg: SUCCESSMSG, response: updateResponse });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /*<=========================END OF BANNER CONTROLLERS====================>*/
@@ -435,20 +482,19 @@ new category. It extracts the `title`, `description`, and `imageUrl` from the re
 a new `Category` object with those values, and calls the `createCategory` method on that object. If
 the category is successfully created, it sends a JSON response with a success message. If there is
 an error, it sends a JSON response with a failure message and the error message. */
-exports.postCategory = (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const imageUrl = image.path;
-  const category = new Category({ title, description, imageUrl });
-  category
-    .createCategory()
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.postCategory = async (req, res, next) => {
+  try {
+    const title = req.body.title;
+    const description = req.body.description;
+    const image = req.file;
+    const imageUrl = image.path;
+    const user = req.user._id;
+    const category = new Category({ title, description, imageUrl, user });
+    const results = await category.save(this);
+    res.status(200).json({ msg: SUCCESSMSG, response: results });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* The above code is defining an exported function called `getCategories` that takes in a request,
@@ -457,25 +503,24 @@ response, and next middleware function as parameters. Inside the function, it ca
 resolved, it sends a JSON response with a status code of 200 and the result as the response body. If
 the promise is rejected, it sends a JSON response with a custom message and the error message as the
 response body. */
-exports.getCategories = (req, res, next) => {
-  Category.getCategories()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getCategories = async (req, res, next) => {
+  try {
+    const results = await Category.find();
+    res.status(200).json({ msg: SUCCESSMSG, response: results });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.getCategory = (req, res, next) => {
-  const categoryId = req.params.categoryId;
-  Category.getCategory(categoryId)
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getCategory = async (req, res, next) => {
+  try {
+    const categoryId = req.params.categoryId;
+    const categoryResults = await Category.findById({ _id: categoryId });
+    console.log("Category results", categoryResults.body);
+    res.status(200).json({ msg: SUCCESSMSG, response: categoryResults });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* The above code is defining an `editCategory` function that handles a PUT request to update a
@@ -484,39 +529,87 @@ and the category ID from the request parameters. It then calls the `udpateCatego
 `Category` model to update the category with the given ID with the new information. If the update is
 successful, it sends a JSON response with a success message. If there is an error, it sends a JSON
 response with a failure message and the error message. */
-exports.editCategory = (req, res, next) => {
+exports.editCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
   const title = req.body.title;
   const description = req.body.description;
   const image = req.file;
   const imageUrl = image !== undefined ? image.path : "";
 
-  Category.findById({ _id: categoryId })
-    .then((category) => {
-      category.title = title;
-      category.description = description;
-      category.imageUrl = imageUrl !== "" ? imageUrl : category.imageUrl;
-      return category.save();
-    })
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+  try {
+    const category = await Category.findById({ _id: categoryId });
+
+    if (category == null) {
+      const error = Error("Category does not exist");
+      error.status = 400;
+      throw error;
+    }
+
+    category.title = title;
+    category.description = description;
+    category.imageUrl = imageUrl !== "" ? imageUrl : category.imageUrl;
+    const updatedCategory = await category.save();
+    res.status(200).json({ msg: SUCCESSMSG, response: updatedCategory });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* The above code is defining an Express route handler function that handles a DELETE request to delete
 a category. It extracts the category ID from the request parameters, calls the `deleteCategory`
 method of the `Category` model to delete the category with the given ID, and sends a JSON response
 indicating success or failure. */
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
-  Category.deleteCategory(categoryId)
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+  try {
+    const category = await Category.findById({ _id: categoryId });
+    if (category == null) {
+      const err = new Error("Category does not exist for deletion");
+      err.status = 400;
+      throw err;
+    }
+
+    const { _id, imageUrl } = category;
+    fs.unlink(imageUrl, async (err) => {
+      if (err) {
+        throw Error(err);
+      }
+      const deleteResponse = await Category.deleteOne({ _id: _id });
+      if (deleteResponse.deletedCount != 1) {
+        const err = new Error(
+          "Unable to delete at this moment try again later"
+        );
+        err.status = 400;
+        throw err;
+      }
+      res.status(200).json({ msg: SUCCESSMSG, response: deleteResponse });
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getDashboardData = async (req, res, next) => {
+  //TODO: Define an aggregation pipeline with a match stage
+  try {
+    const bannersCount = await Banner.countDocuments();
+    const userCount = await User.countDocuments();
+    const productsCount = await Product.countDocuments();
+    const categoriesCount = await Category.countDocuments();
+    const collectionCount = await Collection.countDocuments();
+    const users = await User.find();
+
+    const results = {
+      userTotal: userCount,
+      bannerTotal: bannersCount,
+      productTotal: productsCount,
+      categoryTotal: categoriesCount,
+      collectionTotal: collectionCount,
+      userRegistered: users,
+    };
+
+    res.status(200).json({ msg: SUCCESSMSG, response: results });
+  } catch (err) {
+    next(err);
+  }
 };

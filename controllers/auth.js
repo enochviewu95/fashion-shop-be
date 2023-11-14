@@ -78,7 +78,7 @@ exports.getUser = (req, res, next) => {
   } else {
     res
       .status(200)
-      .json({ status: FAILEDMSG, msg: "Your credentials are incorrect" });
+      .json({ msg: FAILEDMSG, response: "Your credentials are incorrect" });
   }
 };
 

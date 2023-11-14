@@ -5,7 +5,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 // const session = require("express-session");
 // const MongoDBStore = require("connect-mongodb-session")(session);
-const Session = require('./util/session-setup');
+const Session = require("./util/session-setup");
 const logger = require("morgan");
 const cors = require("cors");
 // const multer = require("multer");
@@ -30,15 +30,16 @@ const FAILEDMSG = "failed";
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-app.use(cors({
-  origin: domain,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: domain,
+    credentials: true,
+  })
+);
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 app.use(Session.userSession);
 
@@ -84,7 +85,7 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
-  res.status(err.status || 500).json({ response: FAILEDMSG, msg: err.message });
+  res.status(err.status || 500).json({ msg: FAILEDMSG, response: err.message });
 });
 
 module.exports = app;

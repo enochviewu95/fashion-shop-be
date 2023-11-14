@@ -6,6 +6,7 @@ const CollectionSchema = new Schema(
     title: String,
     description: String,
     imageUrl: String,
+    user: { type: Schema.Types.ObjectId, ref: "users" },
   },
   {
     methods: {
