@@ -9,6 +9,9 @@ const CollectionSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "users" },
   },
   {
+    timestamps: true,
+  },
+  {
     methods: {
       createCollection() {
         return this.save(this);

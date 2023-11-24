@@ -28,12 +28,12 @@ const UserSchema = new Schema(
     provider: {
       type: String,
       required: true,
-      default: "local"
+      default: "local",
     },
     role: {
       type: String,
       required: true,
-      default: "client"
+      default: "client",
     },
 
     resetToken: String,
@@ -128,7 +128,8 @@ const UserSchema = new Schema(
       deserializeUser(userInstance) {
         return function (user, done) {
           process.nextTick(function () {
-            userInstance.findOne({ _id: user.id })
+            userInstance
+              .findOne({ _id: user.id })
               .then((user) => {
                 done(null, user);
               })
@@ -137,8 +138,11 @@ const UserSchema = new Schema(
               });
           });
         };
-      }
+      },
     },
+  },
+  {
+    timestamps: true,
   }
 );
 

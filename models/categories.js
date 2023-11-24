@@ -6,6 +6,8 @@ const CategorySchema = new Schema({
   description: String,
   imageUrl: String,
   user: { type: Schema.Types.ObjectId, ref: "Users" },
+}, {
+  timestamps:true
 });
 
 module.exports = mongoose.model("Category", CategorySchema);
