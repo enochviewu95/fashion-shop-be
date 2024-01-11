@@ -4,6 +4,7 @@ const adminController = require("../controllers/admin");
 const isAuth = require("../middlewares/is-auth");
 const { validator } = require("../validators/validators");
 const create_product = require("../schemas/product_schema/create_product.schema");
+const update_product = require("../schemas/product_schema/update_product.schema");
 const add_banner = require("../schemas/banner_schema/add_banner.schema");
 const update_banner = require("../schemas/banner_schema/update_banner.schema");
 
@@ -37,7 +38,13 @@ router.get("/get-product/:productId", isAuth, adminController.getProduct);
 request method on the path '/edit-product' of the application. When a PUT request is made to this
 route, the `editProduct` function from the `adminController` module will be executed. This route is
 typically used to update an existing product in the application. */
-router.put("/edit-product/:productId", isAuth, adminController.editProduct);
+router.put(
+  "/edit-product/:productId",
+  isAuth,
+  update_product,
+  validator,
+  adminController.editProduct
+);
 
 /* `router.delete('/delete-product/:productId',adminController.deleteProduct)` is creating a route for
 the HTTP DELETE request method on the path '/delete-product/:productId' of the application. When a

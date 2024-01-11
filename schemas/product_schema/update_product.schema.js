@@ -1,6 +1,6 @@
 const { checkSchema } = require("express-validator");
 
-const create_product = checkSchema({
+const update_product = checkSchema({
   title: {
     isString: true,
     escape: true,
@@ -17,7 +17,7 @@ const create_product = checkSchema({
     custom: {
       options: (value, { req, res, next }) => {
         if (!req.file) {
-          throw new Error("Image file is required");
+          return true
         }
         return true;
       },
@@ -41,4 +41,4 @@ const create_product = checkSchema({
   },
 });
 
-module.exports = create_product;
+module.exports = update_product;

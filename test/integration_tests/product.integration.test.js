@@ -104,6 +104,34 @@ describe("POST /admin/api/add-product", () => {
       }
     });
 
+    test("should some payload be missing", async () => {
+      const productPayload = {
+        title: "Product 1",
+        description: "This is the product for testing purposes updated",
+        price: 20.0,
+        category: "",
+        details: "<p>Information has been updated</p>",
+      };
+
+      try {
+        const { body, statusCode, header } = await request(app) //requesting for data from the endpoint
+          .post("/admin/api/add-product")
+          .set("Cookie", loginResponse.headers["set-cookie"])
+          .field("title", productPayload.title)
+          .field("description", productPayload.description)
+          .field("price", productPayload.price)
+          .field("category", productPayload.category)
+          .field("details", productPayload.details)
+          .attach("image", "test/test_assets/shoe_four.webp");
+        expect(statusCode).toBe(400);
+        expect(header["content-type"]).toMatch(/json/);
+        expect(body).toHaveProperty("response");
+        expect(body).toHaveProperty("msg");
+      } catch (err) {
+        throw err;
+      }
+    });
+
     test("should payload be available", async () => {
       const productPayload = {
         title: "Product 1",
@@ -170,7 +198,7 @@ describe("DELETE /admin/api/delete-product/:productId", () => {
     });
     test("should delete product fail", async () => {
       try {
-        const { body, statusCode, header }  = await request(app)
+        const { body, statusCode, header } = await request(app)
           .delete(`/admin/api/delete-product/${productCreated._id}`)
           .set("Cookie", loginResponse.headers["set-cookie"]);
         expect(statusCode).toBe(400); //Expect the status code of response to be 200

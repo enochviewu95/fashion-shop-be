@@ -38,16 +38,16 @@ body, creates a new `Product` object with these values, and calls the `createPro
 `Product` model to save the new product to the database. If the operation is successful, it logs the
 result to the console. If there is an error, it logs the error to the console. */
 exports.postProducts = async (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const imageUrl = image.path;
-  const price = req.body.price;
-  const category = new mongoose.Types.ObjectId(req.body.category);
-  const user = req.user._id;
-  const details = req.body.details;
-
   try {
+    const title = req.body.title;
+    const description = req.body.description;
+    const image = req.file;
+    const imageUrl = image.path;
+    const price = req.body.price;
+    const category = new mongoose.Types.ObjectId(req.body.category);
+    const user = req.user._id;
+    const details = req.body.details;
+
     const product = new Product({
       title,
       description,
