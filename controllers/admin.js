@@ -15,6 +15,17 @@ products, and then sends the result as a JSON response using the `res.json` meth
 error, it logs the error to the console. */
 exports.getProducts = async (req, res, next) => {
   try {
+    const query = req.query;
+    console.log("page search query", page);
+    const stages = [
+      {
+        $match: {},
+      },
+    ];
+        const paginationStage = paginationAggregate({
+          pageNum: pageNumber,
+          items_per_page: ITEM_PER_PAGE,
+        });
     const result = await Product.find();
     res.status(200).json({ msg: SUCCESSMSG, response: result });
   } catch (err) {
@@ -169,25 +180,23 @@ exports.postCollection = (req, res, next) => {
 the database. It calls the `getCollections` method of the `Collection` model to retrieve the
 collections, and then sends the result as a JSON response using the `res.json` method. If there is
 an error, it logs the error to the console. */
-exports.getCollections = (req, res, next) => {
-  Collection.getCollections()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getCollections = async (req, res, next) => {
+  try {
+    const collections = await Collection.find();
+    res.status(200).json({ msg: SUCCESSMSG, response: collections });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.getCollection = (req, res, next) => {
-  const collectionId = req.params.collectionId;
-  Collection.getCollection(collectionId)
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.getCollection = async (req, res, next) => {
+  try {
+    const collectionId = req.params.collectionId;
+    const result = await Collection.findById({ _id: collectionId });
+    res.status(200).json({ msg: SUCCESSMSG, response: result });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* `exports.editCollection` is a function that handles a PUT request to update an existing collection
@@ -516,7 +525,6 @@ exports.getCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.categoryId;
     const categoryResults = await Category.findById({ _id: categoryId });
-    console.log("Category results", categoryResults.body);
     res.status(200).json({ msg: SUCCESSMSG, response: categoryResults });
   } catch (err) {
     next(err);

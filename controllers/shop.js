@@ -3,10 +3,16 @@ const Banner = require("../models/banner");
 const Category = require("../models/categories");
 const Collection = require("../models/collection");
 const User = require("../models/user");
-const { Decimal128 } = require("mongodb");
 const { default: mongoose } = require("mongoose");
+const {
+  priceAggregates,
+  sortAggregates,
+  totalCountOfItems,
+} = require("../aggregates/product_list_stages");
+const sortByCategory = require("../aggregates/sort_by_category");
+const { paginationAggregate } = require("../aggregates/pagination_stages");
 const SUCCESSMSG = "success";
-
+const ITEM_PER_PAGE = 1;
 exports.getShopItems = async (req, res, next) => {
   try {
     const shop = {
@@ -21,7 +27,8 @@ exports.getShopItems = async (req, res, next) => {
       },
     };
     shop.banner = await Banner.findOne({ isSelected: true });
-    shop.product = await Product.find().populate("category").exec();
+    // shop.product = await Product.find().populate("category").exec();
+    shop.product = await Category.aggregate(sortByCategory);
     shop.category = await Category.find();
     shop.collection = await Collection.find();
     let users = await User.find();
@@ -50,63 +57,54 @@ exports.getCategoryProduct = async (req, res, next) => {
   try {
     const categoryId = new mongoose.Types.ObjectId(req.params.id);
     const query = req.query;
-    console.log("This is backend qyuery", query, categoryId);
-    const priceFilters = query.price;
-    const sortFilter = query.sort;
+    const pageNumber = query.page;
+    console.log("Queries", query);
+
+    // const sortFilter = query.sort;
     const stages = [
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "categories",
-        },
-      },
-      {
-        $addFields: {
-          categories: {
-            $arrayElemAt: ["$categories.title", 0],
-          },
-        },
-      },
       {
         $match: { category: categoryId },
       },
     ];
 
-    if (priceFilters) {
-      const priceFiltersValues = JSON.parse(priceFilters);
-      console.log("Price filter array object", priceFiltersValues);
-      const priceRanges = priceFiltersValues.map((range) => {
-        const { min, max } = range;
-        if (max) {
-          return {
-            price: {
-              $gte: Decimal128.fromString(min.toString()),
-              $lte: Decimal128.fromString(max.toString()),
-            },
-          };
-        }
-        return {
-          price: {
-            $gte: Decimal128.fromString(min.toString()),
-          }
-        }
-      });
-      stages.push({
-        $match: { $or: priceRanges },
-      });
+    if (Object.keys(query).length > 0) {
+      const priceRange = query.prices;
+      const sortFilter = query.sort;
+      if (priceRange !== undefined) {
+        console.log("Price filter object", priceRange);
+        const priceJson = JSON.parse(priceRange);
+        const priceFilters = priceAggregates({
+          priceFilter: priceJson,
+        });
+        stages.push(priceFilters);
+      }
+
+      if (sortFilter !== undefined) {
+        const sortObject = JSON.parse(sortFilter);
+        const sortStage = sortAggregates({ sortFilter: sortObject });
+        stages.push(sortStage);
+      }
     }
 
-    if (sortFilter) {
-      const sortObject = JSON.parse(sortFilter);
-      stages.push({
-        $sort: sortObject,
-      });
-    }
+    const paginationStage = paginationAggregate({
+      pageNum: pageNumber,
+      items_per_page: ITEM_PER_PAGE,
+    });
+    stages.push(totalCountOfItems());
+    stages.push(paginationStage);
 
     const products = await Product.aggregate(stages);
-    res.status(200).json({ msg: SUCCESSMSG, response: products });
+    
+    const data = products.length > 0 ? products[0] : { items: [] };
+    data.pageDetails = {};
+    data.pageDetails.hasNextPage = ITEM_PER_PAGE * pageNumber < data.totalItems;
+    data.pageDetails.hasPreviousPage = pageNumber > 1;
+    data.pageDetails.nextPage = parseInt(pageNumber) + 1;
+    data.pageDetails.previousPage = parseInt(pageNumber) - 1;
+    data.pageDetails.lastPage = Math.ceil(data.totalItems / ITEM_PER_PAGE);
+    data.pageDetails.currentPage = parseInt(pageNumber);
+
+    res.status(200).json({ msg: SUCCESSMSG, response: data });
   } catch (err) {
     next(err);
   }
