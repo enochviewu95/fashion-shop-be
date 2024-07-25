@@ -6,7 +6,11 @@ const Category = require("../models/categories");
 const SUCCESSMSG = "success";
 const mongoose = require("mongoose");
 const fs = require("fs");
+const path = require("path");
+const { uploadImage, deleteImage } = require("../util/google-storage");
 
+const { paginationAggregate } = require("../aggregates/pagination_stages");
+const ITEM_PER_PAGE = 1;
 /*<=========================PRODUCT CONTROLLERS====================>*/
 
 /* This code exports a function named `getProducts` that handles a GET request to retrieve all products
@@ -15,19 +19,20 @@ products, and then sends the result as a JSON response using the `res.json` meth
 error, it logs the error to the console. */
 exports.getProducts = async (req, res, next) => {
   try {
-    const query = req.query;
-    console.log("page search query", page);
-    const stages = [
-      {
-        $match: {},
-      },
-    ];
-        const paginationStage = paginationAggregate({
-          pageNum: pageNumber,
-          items_per_page: ITEM_PER_PAGE,
-        });
-    const result = await Product.find();
-    res.status(200).json({ msg: SUCCESSMSG, response: result });
+    const { page: currentPage, limit } = req.query;
+    const skip = (parseInt(currentPage) - 1) * limit;
+    const totalDocument = await Banner.countDocuments();
+    const totalPages = Math.ceil(totalDocument / limit);
+    const data = await Product.find().skip(skip).limit(limit).exec();
+    res
+      .status(200)
+      .json({
+        msg: SUCCESSMSG,
+        response: data,
+        totalDocument,
+        totalPages,
+        currentPage: parseInt(currentPage),
+      });
   } catch (err) {
     next(err);
   }
@@ -50,14 +55,11 @@ body, creates a new `Product` object with these values, and calls the `createPro
 result to the console. If there is an error, it logs the error to the console. */
 exports.postProducts = async (req, res, next) => {
   try {
-    const title = req.body.title;
-    const description = req.body.description;
-    const image = req.file;
-    const imageUrl = image.path;
-    const price = req.body.price;
+    const { title, description, price, details } = req.body;
     const category = new mongoose.Types.ObjectId(req.body.category);
     const user = req.user._id;
-    const details = req.body.details;
+
+    const imageUrl = await uploadImage(req, "products");
 
     const product = new Product({
       title,
@@ -129,10 +131,7 @@ exports.deleteProduct = async (req, res, next) => {
 
     const { _id, imageUrl } = product;
 
-    fs.unlink(imageUrl, async (err) => {
-      if (err) {
-        throw Error(err);
-      }
+    deleteImage(imageUrl, async () => {
       const deleteResponse = await Product.deleteOne({ _id: _id });
       if (deleteResponse.deletedCount != 1) {
         const err = new Error(
@@ -255,19 +254,11 @@ success message using the `res.json` method. If there is an error, it sends a JS
 error message using the `res.json` method. */
 exports.postBanner = async (req, res, next) => {
   try {
-    const title = req.body.title;
-    const description = req.body.description;
-    const image = req.file;
-    const isSelected = false;
+    const { title, description } = req.body;
     const user = req.user._id;
+    const isSelected = false;
 
-    if (!image) {
-      const error = new Error("Invalid image");
-      error.status = 400;
-      throw error;
-    }
-
-    const imageUrl = image.path;
+    const imageUrl = await uploadImage(req, "banners");
 
     const banner = new Banner({
       title,
@@ -290,8 +281,19 @@ sends the result as a JSON response using the `res.json` method. If there is an 
 JSON response with an error message using the `res.json` method. */
 exports.getBanners = async (req, res, next) => {
   try {
-    const data = await Banner.find();
-    res.status(200).json({ msg: SUCCESSMSG, response: data });
+    const { page: currentPage, limit } = req.query;
+    const skip = (parseInt(currentPage) - 1) * limit;
+    const totalDocument = await Banner.countDocuments();
+    const totalPages = Math.ceil(totalDocument / limit);
+    const data = await Banner.find().skip(skip).limit(limit).exec();
+
+    res.status(200).json({
+      msg: SUCCESSMSG,
+      response: data,
+      totalDocument,
+      totalPages,
+      currentPage: parseInt(currentPage),
+    });
   } catch (err) {
     next(err);
   }
@@ -304,14 +306,12 @@ banner in the database. If the operation is successful, it sends a JSON response
 message using the `res.json` method. If there is an error, it sends a JSON response with an error
 message using the `res.json` method. */
 exports.editBanner = async (req, res, next) => {
-  const bannerId = req.params.bannerId;
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const isSelected = req.body.selected;
-  const imageUrl = image !== undefined ? image.path : "";
-
   try {
+    const { bannerId } = req.params;
+    const { title, description, selected } = req.body;
+    const image = req.file;
+    const imageUrl = image !== undefined ? image.path : "";
+
     const banner = await Banner.findById({ _id: bannerId });
 
     if (banner == null) {
@@ -321,8 +321,9 @@ exports.editBanner = async (req, res, next) => {
     }
     banner.title = title;
     banner.description = description;
-    banner.imageUrl = imageUrl !== "" ? imageUrl : banner.imageUrl;
-    banner.isSelected = isSelected;
+    banner.imageUrl =
+      imageUrl !== "" ? await uploadImage(req) : banner.imageUrl;
+    banner.isSelected = selected;
     const data = await banner.save();
     res.json({ msg: SUCCESSMSG, response: data });
   } catch (err) {
@@ -347,12 +348,7 @@ exports.deleteBanner = async (req, res, next) => {
 
     const { id, imageUrl } = banner;
 
-    fs.unlink(imageUrl, async (err) => {
-      if (err) {
-        const error = Error(err);
-        error.status = 400;
-        throw error;
-      }
+    deleteImage(imageUrl, async () => {
       const deleteResponse = await Banner.deleteOne({ _id: id });
       if (!deleteResponse.acknowledged && deleteResponse.deletedCount != 1) {
         const err = new Error(
@@ -493,10 +489,8 @@ the category is successfully created, it sends a JSON response with a success me
 an error, it sends a JSON response with a failure message and the error message. */
 exports.postCategory = async (req, res, next) => {
   try {
-    const title = req.body.title;
-    const description = req.body.description;
-    const image = req.file;
-    const imageUrl = image.path;
+    const { title, description } = req.body;
+    const imageUrl = await uploadImage(req, "categories");
     const user = req.user._id;
     const category = new Category({ title, description, imageUrl, user });
     const results = await category.save(this);
@@ -514,8 +508,18 @@ the promise is rejected, it sends a JSON response with a custom message and the 
 response body. */
 exports.getCategories = async (req, res, next) => {
   try {
-    const results = await Category.find();
-    res.status(200).json({ msg: SUCCESSMSG, response: results });
+    const { page: currentPage, limit } = req.query;
+    const skip = (parseInt(currentPage) - 1) * limit;
+    const totalDocument = await Category.countDocuments();
+    const totalPages = Math.ceil(totalDocument / limit);
+    const results = await Category.find().skip(skip).limit(limit).exec();
+    res.status(200).json({
+      msg: SUCCESSMSG,
+      response: results,
+      totalDocument,
+      totalPages,
+      currentPage: parseInt(currentPage),
+    });
   } catch (err) {
     next(err);
   }
@@ -578,10 +582,7 @@ exports.deleteCategory = async (req, res, next) => {
     }
 
     const { _id, imageUrl } = category;
-    fs.unlink(imageUrl, async (err) => {
-      if (err) {
-        throw Error(err);
-      }
+    deleteImage(imageUrl, async () => {
       const deleteResponse = await Category.deleteOne({ _id: _id });
       if (deleteResponse.deletedCount != 1) {
         const err = new Error(

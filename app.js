@@ -47,7 +47,7 @@ app.use(Multer.fileupload);
 
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(passport.initialize());
 app.use(passport.session());

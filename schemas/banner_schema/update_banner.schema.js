@@ -13,7 +13,7 @@ const update_banner = checkSchema({
     errorMessage: "description field is empty",
     isEmpty: false,
   },
-  isSelected: {
+  selected: {
     isBoolean: true,
     escape: true,
     isEmpty: false,
