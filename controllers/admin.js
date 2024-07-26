@@ -21,18 +21,17 @@ exports.getProducts = async (req, res, next) => {
   try {
     const { page: currentPage, limit } = req.query;
     const skip = (parseInt(currentPage) - 1) * limit;
-    const totalDocument = await Banner.countDocuments();
+    const totalDocument = await Product.countDocuments();
     const totalPages = Math.ceil(totalDocument / limit);
     const data = await Product.find().skip(skip).limit(limit).exec();
-    res
-      .status(200)
-      .json({
-        msg: SUCCESSMSG,
-        response: data,
-        totalDocument,
-        totalPages,
-        currentPage: parseInt(currentPage),
-      });
+    res.status(200).json({
+      msg: SUCCESSMSG,
+      response: data,
+      totalDocument,
+      totalPages,
+      currentPage: parseInt(currentPage),
+      resultsPerPage: parseInt(limit),
+    });
   } catch (err) {
     next(err);
   }
@@ -293,6 +292,7 @@ exports.getBanners = async (req, res, next) => {
       totalDocument,
       totalPages,
       currentPage: parseInt(currentPage),
+      resultsPerPage: parseInt(limit),
     });
   } catch (err) {
     next(err);
@@ -519,6 +519,7 @@ exports.getCategories = async (req, res, next) => {
       totalDocument,
       totalPages,
       currentPage: parseInt(currentPage),
+      resultsPerPage: parseInt(limit),
     });
   } catch (err) {
     next(err);

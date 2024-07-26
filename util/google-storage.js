@@ -13,14 +13,17 @@ const {
 const storage = getStorage(app);
 
 const uploadImage = async (req, subfolder) => {
-  const metadata = { contentType: 'image/webp' };
+  const metadata = { contentType: "image/webp" };
   const inputPath = req.file.path;
 
   const originalFilename = req.file.originalname;
   const outputFileName = originalFilename.replace(/\.[^/.]+$/, ".webp");
 
   sharp.cache(false);
-  const webBuffer = await sharp(inputPath).webp({ quality: 50 }).toBuffer();
+  const webBuffer = await sharp(inputPath)
+    .resize(1280, 853)
+    .webp({ quality: 50 })
+    .toBuffer();
 
   const storageRef = ref(
     storage,
