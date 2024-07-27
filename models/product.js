@@ -9,7 +9,8 @@ const ProductsSchema = new Schema(
     imageUrl: String,
     price: Schema.Types.Decimal128,
     details: String,
-    category: { type: Schema.Types.ObjectId, ref: "Category" },
+    category: { type: Schema.Types.ObjectId, ref: "Category", required: false },
+    catalog: { type: Schema.Types.ObjectId, ref: "Collection", required: false },
     user: { type: Schema.Types.ObjectId, ref: "Users" },
   },
   {

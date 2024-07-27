@@ -53,58 +53,135 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
+
 exports.getCategoryProduct = async (req, res, next) => {
   try {
     const categoryId = new mongoose.Types.ObjectId(req.params.id);
-    const query = req.query;
-    const pageNumber = query.page;
-    console.log("Queries", query);
+    const {
+      page: currentPage = 1,
+      limit = 10,
+      created_at,
+      price: itemPrice,
+    } = req.query;
 
-    // const sortFilter = query.sort;
-    const stages = [
-      {
-        $match: { category: categoryId },
-      },
-    ];
+    // Ensure currentPage and limit are integers
+    const page = parseInt(currentPage, 10);
+    const perPage = parseInt(limit, 10);
 
-    if (Object.keys(query).length > 0) {
-      const priceRange = query.prices;
-      const sortFilter = query.sort;
-      if (priceRange !== undefined) {
-        console.log("Price filter object", priceRange);
-        const priceJson = JSON.parse(priceRange);
-        const priceFilters = priceAggregates({
-          priceFilter: priceJson,
-        });
-        stages.push(priceFilters);
-      }
+    // Validate page and limit
+    if (isNaN(page) || page < 1) throw new Error('Invalid page number');
+    if (isNaN(perPage) || perPage < 1) throw new Error('Invalid limit');
 
-      if (sortFilter !== undefined) {
-        const sortObject = JSON.parse(sortFilter);
-        const sortStage = sortAggregates({ sortFilter: sortObject });
-        stages.push(sortStage);
+    let priceConditions = {};
+    if (itemPrice) {
+      const priceFilter = JSON.parse(itemPrice);
+      const { min, max } = priceFilter;
+
+      if (min !== undefined && max !== undefined) {
+        priceConditions = {
+          price: { $gte: min, $lte: max }
+        };
+      } else if (min !== undefined) {
+        priceConditions = { price: { $gte: min } };
+      } else if (max !== undefined) {
+        priceConditions = { price: { $lte: max } };
       }
     }
 
-    const paginationStage = paginationAggregate({
-      pageNum: pageNumber,
-      items_per_page: ITEM_PER_PAGE,
+    console.log('Price condition', priceConditions);
+
+    const skip = (page - 1) * perPage;
+    const totalDocument = await Product.countDocuments({
+      category: categoryId,
+      ...priceConditions,
     });
-    stages.push(totalCountOfItems());
-    stages.push(paginationStage);
+    const totalPages = Math.ceil(totalDocument / perPage);
+    const sortOrder = created_at === "asc" ? 1 : -1;
 
-    const products = await Product.aggregate(stages);
-    
-    const data = products.length > 0 ? products[0] : { items: [] };
-    data.pageDetails = {};
-    data.pageDetails.hasNextPage = ITEM_PER_PAGE * pageNumber < data.totalItems;
-    data.pageDetails.hasPreviousPage = pageNumber > 1;
-    data.pageDetails.nextPage = parseInt(pageNumber) + 1;
-    data.pageDetails.previousPage = parseInt(pageNumber) - 1;
-    data.pageDetails.lastPage = Math.ceil(data.totalItems / ITEM_PER_PAGE);
-    data.pageDetails.currentPage = parseInt(pageNumber);
+    const products = await Product.find({
+      category: categoryId,
+      ...priceConditions,
+    })
+      .skip(skip)
+      .limit(perPage)
+      .sort({ createdAt: sortOrder })
+      .exec();
 
-    res.status(200).json({ msg: SUCCESSMSG, response: data });
+    res.status(200).json({
+      msg: SUCCESSMSG,
+      response: products,
+      totalDocument,
+      totalPages,
+      currentPage: page,
+      resultsPerPage: perPage,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+exports.getCollectionProduct = async (req, res, next) => {
+  try {
+    const collectionId = new mongoose.Types.ObjectId(req.params.id);
+    const {
+      page: currentPage = 1,
+      limit = 10,
+      created_at,
+      price: itemPrice,
+    } = req.query;
+
+    // Ensure currentPage and limit are integers
+    const page = parseInt(currentPage, 10);
+    const perPage = parseInt(limit, 10);
+
+    // Validate page and limit
+    if (isNaN(page) || page < 1) throw new Error('Invalid page number');
+    if (isNaN(perPage) || perPage < 1) throw new Error('Invalid limit');
+
+    let priceConditions = {};
+    if (itemPrice) {
+      const priceFilter = JSON.parse(itemPrice);
+      const { min, max } = priceFilter;
+
+      if (min !== undefined && max !== undefined) {
+        priceConditions = {
+          price: { $gte: min, $lte: max }
+        };
+      } else if (min !== undefined) {
+        priceConditions = { price: { $gte: min } };
+      } else if (max !== undefined) {
+        priceConditions = { price: { $lte: max } };
+      }
+    }
+
+    console.log('Price condition', priceConditions);
+
+    const skip = (page - 1) * perPage;
+    const totalDocument = await Product.countDocuments({
+      catalog: collectionId,
+      ...priceConditions,
+    });
+    const totalPages = Math.ceil(totalDocument / perPage);
+    const sortOrder = created_at === "asc" ? 1 : -1;
+
+    const products = await Product.find({
+      catalog: collectionId,
+      ...priceConditions,
+    })
+      .skip(skip)
+      .limit(perPage)
+      .sort({ createdAt: sortOrder })
+      .exec();
+
+    res.status(200).json({
+      msg: SUCCESSMSG,
+      response: products,
+      totalDocument,
+      totalPages,
+      currentPage: page,
+      resultsPerPage: perPage,
+    });
   } catch (err) {
     next(err);
   }

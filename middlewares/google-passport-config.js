@@ -11,7 +11,7 @@ module.exports = function (passport) {
       },
       async function (accessToken, refreshToken, profile, done) {
         try {
-          const registeredUser = await User.findOne({ googleId: profile.id });
+          const registeredUser = await User.find({ googleId: profile.id });
           if (!registeredUser) {
             const user = new User({
               email: profile.emails[0].value,
@@ -22,12 +22,8 @@ module.exports = function (passport) {
               role: "client",
             });
 
-            try {
-              const response = user.createUser();
-              done(null, response);
-            } catch (err) {
-              done(err);
-            }
+            const response = user.createUser();
+            done(null, response);
           } else {
             done(null, registeredUser);
           }

@@ -31,8 +31,14 @@ const create_product = checkSchema({
   category: {
     isString: true,
     escape: true,
-    notEmpty: true,
-    errorMessage: "category field is empty",
+    notEmpty: false,
+    default: "",
+  },
+  collection: {
+    isString: true,
+    escape: true,
+    notEmpty: false,
+    default: "",
   },
   price: {
     isDecimal: true,

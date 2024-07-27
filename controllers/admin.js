@@ -56,6 +56,7 @@ exports.postProducts = async (req, res, next) => {
   try {
     const { title, description, price, details } = req.body;
     const category = new mongoose.Types.ObjectId(req.body.category);
+    const catalog = new mongoose.Types.ObjectId(req.body.collection);
     const user = req.user._id;
 
     const imageUrl = await uploadImage(req, "products");
@@ -66,6 +67,7 @@ exports.postProducts = async (req, res, next) => {
       imageUrl,
       price,
       category,
+      catalog,
       details,
       user,
     });
@@ -83,16 +85,13 @@ the product in the database. If the operation is successful, it sends a JSON res
 message using the `res.json` method. If there is an error, it logs the error to the console. */
 exports.editProduct = async (req, res, next) => {
   try {
-    const prodId = req.params.productId;
-    const title = req.body.title;
-    const description = req.body.description;
+    const { productId } = req.params;
+    const { title, description, price, details } = req.body;
     const image = req.file;
     const imageUrl = image !== undefined ? image.path : "";
-    const price = req.body.price;
     const category = new mongoose.Types.ObjectId(req.body.category);
-    const details = req.body.details;
 
-    const product = await Product.findById({ _id: prodId });
+    const product = await Product.findById({ _id: productId });
     if (product == null) {
       const error = Error("Product does not exist");
       error.status = 400;
@@ -104,7 +103,8 @@ exports.editProduct = async (req, res, next) => {
     product.price = price;
     product.category = category;
     product.details = details;
-    product.imageUrl = imageUrl !== "" ? imageUrl : product.imageUrl;
+    product.imageUrl =
+      imageUrl !== "" ? await uploadImage(req, "products") : product.imageUrl;
 
     const updatedProduct = await product.save();
     res.status(200).json({ msg: SUCCESSMSG, response: updatedProduct });
@@ -158,20 +158,17 @@ new `Collection` object with these values, and calls the `createCollection` meth
 `Collection` model to save the new collection to the database. If the operation is successful, it
 sends a JSON response with a success message using the `res.json` method. If there is an error, it
 logs the error to the console. */
-exports.postCollection = (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const imageUrl = image.path;
-  const product = new Collection({ title, description, imageUrl });
-  product
-    .createCollection()
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+exports.postCollection = async (req, res, next) => {
+  try {
+    const { title, description } = req.body;
+    const imageUrl = await uploadImage(req, "collections");
+    const user = req.user._id;
+    const collection = new Collection({ title, description, imageUrl, user });
+    const results = await collection.save(this);
+    res.status(200).json({ msg: SUCCESSMSG, response: results });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* `exports.getCollection` is a function that handles a GET request to retrieve all collections from
@@ -180,8 +177,21 @@ collections, and then sends the result as a JSON response using the `res.json` m
 an error, it logs the error to the console. */
 exports.getCollections = async (req, res, next) => {
   try {
-    const collections = await Collection.find();
-    res.status(200).json({ msg: SUCCESSMSG, response: collections });
+    const { page: currentPage, limit } = req.query;
+    const skip = (parseInt(currentPage) - 1) * limit;
+    const totalDocument = await Collection.countDocuments();
+    const totalPages = Math.ceil(totalDocument / limit);
+    const collections = await Collection.find().skip(skip).limit(limit).exec();
+    res
+      .status(200)
+      .json({
+        msg: SUCCESSMSG,
+        response: collections,
+        totalDocument,
+        totalPages,
+        currentPage: parseInt(currentPage),
+        resultsPerPage: parseInt(limit),
+      });
   } catch (err) {
     next(err);
   }
@@ -203,26 +213,31 @@ collection ID from the request parameters. It then calls the `updateProduct` met
 model to update the collection in the database. If the operation is successful, it sends a JSON
 response with a success message using the `res.json` method. If there is an error, it logs the error
 to the console. */
-exports.editCollection = (req, res, next) => {
-  const collectionId = req.params.collectionId;
-  const title = req.body.title;
-  const description = req.body.description;
-  const image = req.file;
-  const imageUrl = image !== undefined ? image.path : "";
+exports.editCollection = async (req, res, next) => {
+  try {
+    const { collectionId } = req.params;
+    const { title, description } = req.body;
+    const image = req.file;
+    const imageUrl = image !== undefined ? image.path : "";
 
-  Collection.findById({ _id: collectionId })
-    .then((collection) => {
-      collection.title = title;
-      collection.description = description;
-      collection.imageUrl = imageUrl !== "" ? imageUrl : collection.imageUrl;
-      return collection.save();
-    })
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
-    });
+    const collection = await Collection.findById({ _id: collectionId });
+    if (collection == null) {
+      const err = Error("Collection not found");
+      err.status = 400;
+      throw err;
+    }
+
+    collection.title = title;
+    collection.description = description;
+    collection.imageUrl =
+      imageUrl !== ""
+        ? await uploadImage(req, "collections")
+        : collection.imageUrl;
+    const data = await collection.save();
+    res.json({ msg: SUCCESSMSG, response: data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /* This code exports a function named `deleteCollection` that handles a DELETE request to delete a
@@ -230,15 +245,33 @@ collection from the database. It extracts the `collectionId` from the request pa
 `deleteProduct` method of the `Collection` model to delete the collection from the database. If the
 operation is successful, it sends a JSON response with a success message using the `res.json`
 method. If there is an error, it logs the error to the console. */
-exports.deleteCollection = (req, res, next) => {
-  const collectionId = req.params.collectionId;
-  Collection.deleteCollection(collectionId)
-    .then(() => {
-      res.json({ response: SUCCESSMSG });
-    })
-    .catch((err) => {
-      next(err);
+exports.deleteCollection = async (req, res, next) => {
+  try {
+    const collectionId = req.params.collectionId;
+    const collection = await Collection.findById({ _id: collectionId });
+    if (collection == null) {
+      const error = Error("Collection not found");
+      error.status = 400;
+      throw error;
+    }
+
+    const { id, imageUrl } = collection;
+    deleteImage(imageUrl, async () => {
+      const deleteResponse = await Collection.deleteOne({ _id: id });
+      if (!deleteResponse.acknowledged && deleteResponse.deletedCount != 1) {
+        const err = new Error(
+          "Unable to delete at this moment try again later"
+        );
+        err.status = 400;
+        throw err;
+      }
+      res
+        .status(200)
+        .json({ msg: SUCCESSMSG, response: "Collection deleted successfully" });
     });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /*<=========================END OF COLLECTION CONTROLLERS====================>*/
@@ -322,7 +355,7 @@ exports.editBanner = async (req, res, next) => {
     banner.title = title;
     banner.description = description;
     banner.imageUrl =
-      imageUrl !== "" ? await uploadImage(req) : banner.imageUrl;
+      imageUrl !== "" ? await uploadImage(req, "banners") : banner.imageUrl;
     banner.isSelected = selected;
     const data = await banner.save();
     res.json({ msg: SUCCESSMSG, response: data });
@@ -341,7 +374,7 @@ exports.deleteBanner = async (req, res, next) => {
     const bannerId = req.params.bannerId;
     const banner = await Banner.findById({ _id: bannerId });
     if (banner == null) {
-      const error = Error(banner);
+      const error = Error("Banner not found");
       error.status = 400;
       throw error;
     }

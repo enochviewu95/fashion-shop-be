@@ -7,15 +7,17 @@ const signinSchema = require("../schemas/auth_schema/signin.schema");
 const router = express.Router();
 
 router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
+
+router.get(
   "/google/callback",
   passport.authenticate("google", (failedRedirect = "/login")),
   function (req, res) {
+    console.log('Redirect page')
     res.redirect(process.env.FASHION_DOMAIN_NAME_VALUE); 
   }
-);
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
 router.post(

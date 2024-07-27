@@ -86,7 +86,7 @@ const UserSchema = new Schema(
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: "/auth/google/callback",
           },
-          verify: async function (accessToken, refreshToken, profile, done) {
+          verify: async (accessToken, refreshToken, profile, done) => {
             try {
               const registeredUser = await this.findOne({
                 googleId: profile.id,
