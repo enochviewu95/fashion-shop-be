@@ -26,7 +26,9 @@ exports.postSignup = (req, res, next) => {
   User.getUser(email)
     .then((userDoc) => {
       if (userDoc) {
-        return res.status(200).json({ response: "Email exist already" });
+        const err = Error("Email exist already");
+        err.status = 400;
+        throw err;
       }
 
       return bcrypt
@@ -65,7 +67,7 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getUser = (req, res, next) => {
-  console.log('Checking registeration')
+  console.log("Checking registeration");
   if (req.user) {
     res.status(200).json({
       msg: SUCCESSMSG,
