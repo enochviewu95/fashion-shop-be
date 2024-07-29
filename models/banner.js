@@ -1,34 +1,23 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const BannerSchema = new Schema(
-    {
-        title: String,
-        description: String,
-        imageUrl: String
+  {
+    title: {
+      type: String,
+      required: true,
     },
-    {
-        methods: {
-            createBanner() {
-                return this.save(this)
-            }
-        },
-
-        statics: {
-            getBanners() {
-                return this.find();
-            },
-
-            updateBanner(bannerId, update) {
-                return this.findOneAndUpdate({ _id: bannerId }, update)
-            },
-
-            deleteBanner(bannerId) {
-                return this.deleteOne({ _id: bannerId })
-            }
-        }
-    }
-
+    description: {
+      type: String,
+      required: true,
+    },
+    imageUrl: String,
+    isSelected: Boolean,
+    user: { type: Schema.Types.ObjectId, ref: "users" },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model('banners', BannerSchema);
+module.exports = mongoose.model("banners", BannerSchema);

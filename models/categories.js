@@ -1,16 +1,16 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const CollectionSchema = new Schema(
+const CategorySchema = new Schema(
   {
     title: String,
     description: String,
     imageUrl: String,
-    user: { type: Schema.Types.ObjectId, ref: "users" },
+    user: { type: Schema.Types.ObjectId, ref: "Users" },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-module.exports = mongoose.model("collections", CollectionSchema);
+module.exports = mongoose.model("Category", CategorySchema);

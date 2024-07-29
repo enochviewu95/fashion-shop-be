@@ -1,8 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const shopController = require('../controllers/shop')
+const shopController = require("../controllers/shop");
+const cache = require('../middlewares/cache-config')
 
-/* GET home page. */
-router.get('/', shopController.getProducts);
+
+router.get("/get-shop",shopController.getShopItems)
+router.get('/get-product/:id', shopController.getProduct)
+router.get("/get-category-product/:id", shopController.getCategoryProduct);
+router.get("/get-collection-product/:id", shopController.getCollectionProduct);
 
 module.exports = router;

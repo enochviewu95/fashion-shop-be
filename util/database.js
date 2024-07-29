@@ -1,27 +1,22 @@
-const { default: mongoose } = require('mongoose');
-require('dotenv').config()
-const USERNAME = process.env.USER;
-const HOST = process.env.HOST;
-const COLLECTION = process.env.COLLECTION;
-const RETRYWRITES= process.env.RETRYWRITES;
-const W = process.env.W;
-const PASSWORD = process.env.PASSWORD;
+const { default: mongoose } = require("mongoose");
+require("dotenv").config();
 
-const mongooseConnect = (callback)=>{
-    mongoose
-    .connect(`mongodb+srv://${USERNAME}:${PASSWORD}${HOST}/${COLLECTION}?retryWrites=${RETRYWRITES}&w=${W}`)
-    .then(client=>{
-        _mongoose = client;
-        callback(client)
-    })
-    .catch(err=>{
-        handleError(err)
-    })
-}
+const mongooseConnect = async () => {
+  try {
+    const connection = await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected");
+    return connection;
+  } catch (error) {
+    handleConnectionError(error);
+  }
+};
 
+const handleConnectionError = (err) => {
+  setTimeout(async () => {
+    console.log("Connection failed.", err);
+    console.log("Reconnection ...");
+    await mongooseConnect();
+  }, 2000);
+};
 
-const handleError = (err)=>{
-    console.log(err);
-}
-
-exports.mongooseConnect = mongooseConnect;
+module.exports = { mongooseConnect };
