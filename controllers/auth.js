@@ -67,7 +67,6 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getUser = (req, res, next) => {
-  console.log("Checking registeration");
   if (req.user) {
     res.status(200).json({
       msg: SUCCESSMSG,

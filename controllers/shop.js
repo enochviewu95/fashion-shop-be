@@ -88,7 +88,6 @@ exports.getCategoryProduct = async (req, res, next) => {
       }
     }
 
-    console.log('Price condition', priceConditions);
 
     const skip = (page - 1) * perPage;
     const totalDocument = await Product.countDocuments({
@@ -154,8 +153,6 @@ exports.getCollectionProduct = async (req, res, next) => {
         priceConditions = { price: { $lte: max } };
       }
     }
-
-    console.log('Price condition', priceConditions);
 
     const skip = (page - 1) * perPage;
     const totalDocument = await Product.countDocuments({

@@ -15,7 +15,6 @@ router.get(
   "/google/callback",
   passport.authenticate("google", (failedRedirect = "/login")),
   function (req, res) {
-    console.log('Redirect page')
     res.redirect(process.env.FASHION_DOMAIN_NAME_VALUE); 
   }
 );

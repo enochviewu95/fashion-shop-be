@@ -1,7 +1,6 @@
 const { Decimal128 } = require("mongodb");
 
 const priceAggregates = ({ priceFilter }) => {
-  console.log("Price filter object aggr", priceFilter);
   if (priceFilter.length !== 0) {
     const priceRanges = priceFilter.map((range) => {
       const { min, max } = range;
@@ -19,7 +18,6 @@ const priceAggregates = ({ priceFilter }) => {
         },
       };
     });
-    console.log("Price ranges", priceRanges);
     return {
       $match: { $or: priceRanges },
     };

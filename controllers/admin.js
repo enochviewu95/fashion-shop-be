@@ -90,6 +90,7 @@ exports.editProduct = async (req, res, next) => {
     const image = req.file;
     const imageUrl = image !== undefined ? image.path : "";
     const category = new mongoose.Types.ObjectId(req.body.category);
+    const catalog = new mongoose.Types.ObjectId(req.body.collection);
 
     const product = await Product.findById({ _id: productId });
     if (product == null) {
@@ -102,6 +103,7 @@ exports.editProduct = async (req, res, next) => {
     product.description = description;
     product.price = price;
     product.category = category;
+    product.catalog = catalog;
     product.details = details;
     product.imageUrl =
       imageUrl !== "" ? await uploadImage(req, "products") : product.imageUrl;

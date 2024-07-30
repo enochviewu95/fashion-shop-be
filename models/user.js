@@ -101,12 +101,8 @@ const UserSchema = new Schema(
                   role: "client",
                 };
 
-                try {
-                  const response = this.save(user);
-                  done(null, response);
-                } catch (err) {
-                  done(err);
-                }
+                const response = await this.create(user);
+                done(null, response);
               } else {
                 done(null, registeredUser);
               }

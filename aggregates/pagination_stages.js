@@ -1,6 +1,5 @@
 const paginationAggregate = ({ pageNum, items_per_page }) => {
   const pageNumInt = parseInt(pageNum);
-  console.log("Page number", typeof pageNumInt, pageNumInt);
   return {
     $project: {
       _id: 1,
